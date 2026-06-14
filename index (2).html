@@ -1,0 +1,2019 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0d3b66">
+<title>PTW – Safe Working Permission</title>
+<style>
+:root{
+  --navy:#0d3b66; --navy2:#15518a; --green:#1e8e3e; --green-bg:#e6f4ea;
+  --red:#d93025; --red-bg:#fce8e6; --amber:#f9ab00; --amber-bg:#fef7e0;
+  --gray:#5f6368; --gray-bg:#f1f3f4; --blue:#1a73e8; --blue-bg:#e8f0fe;
+  --border:#dadce0; --ink:#202124; --paper-border:#222;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:'Segoe UI',Roboto,Arial,sans-serif;background:#eef1f5;color:var(--ink);font-size:14px}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:13px}
+
+/* ===== Login ===== */
+#loginScreen{position:fixed;inset:0;background:linear-gradient(135deg,#0d3b66 0%,#15518a 60%,#1a73e8 100%);z-index:500;display:flex;align-items:center;justify-content:center;padding:16px}
+.loginbox{background:#fff;border-radius:16px;padding:28px 24px;width:100%;max-width:360px;box-shadow:0 10px 40px rgba(0,0,0,.4);text-align:center}
+.loginbox .lg{font-weight:900;font-size:20px;letter-spacing:3px;color:var(--navy);border:2.5px solid var(--navy);display:inline-block;padding:3px 14px;border-radius:6px}
+.loginbox .sub{font-size:11px;letter-spacing:2px;color:var(--gray);margin:6px 0 18px;text-transform:uppercase}
+.loginbox input{width:100%;border:1.5px solid var(--border);border-radius:9px;padding:11px 12px;font-size:14px;margin-bottom:10px}
+.loginbox button{width:100%;background:var(--navy);color:#fff;border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:700}
+.loginbox .err{color:var(--red);font-size:12px;min-height:16px;margin-bottom:6px;font-weight:600}
+.loginbox .hint{font-size:11px;color:var(--gray);margin-top:14px}
+
+/* ===== App bar ===== */
+.appbar{background:var(--navy);color:#fff;padding:10px 14px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;position:sticky;top:0;z-index:50;box-shadow:0 2px 6px rgba(0,0,0,.25)}
+.appbar .logo{font-weight:800;font-size:17px;letter-spacing:1px;display:flex;align-items:center;gap:8px}
+.appbar .logo .enp{background:#fff;color:var(--navy);padding:2px 8px;border-radius:4px;font-size:13px;letter-spacing:2px}
+.appbar .sub{font-size:11px;opacity:.85;display:block;letter-spacing:.5px}
+.userchip{background:rgba(255,255,255,.15);border-radius:18px;padding:5px 12px;font-size:12px;font-weight:700;display:flex;align-items:center;gap:6px;white-space:nowrap}
+.userchip .dp{background:#fff;color:var(--navy);border-radius:9px;padding:1px 7px;font-size:10px}
+.searchwrap{flex:1;min-width:150px;max-width:420px;margin-left:auto;display:flex;gap:6px}
+.searchwrap input{flex:1;padding:8px 12px;border-radius:20px;border:none;outline:none;font-size:13px;min-width:90px}
+.iconbtn{background:rgba(255,255,255,.15);border:none;color:#fff;border-radius:50%;width:36px;height:36px;font-size:16px;flex:none}
+.iconbtn:hover{background:rgba(255,255,255,.3)}
+
+/* ===== Tabs ===== */
+.tabs{display:flex;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;position:sticky;top:56px;z-index:40}
+.tab{flex:1;min-width:88px;padding:11px 8px;border:none;background:none;font-size:12.5px;font-weight:600;color:var(--gray);border-bottom:3px solid transparent;white-space:nowrap}
+.tab.active{color:var(--navy);border-bottom-color:var(--navy)}
+.tab .cnt{background:var(--gray-bg);border-radius:10px;padding:1px 7px;font-size:10.5px;margin-left:4px}
+.tab.active .cnt{background:var(--blue-bg);color:var(--navy)}
+
+.container{max-width:1100px;margin:0 auto;padding:14px}
+
+/* ===== Stats ===== */
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;margin-bottom:14px}
+.stat{background:#fff;border-radius:10px;padding:12px 14px;border-left:5px solid var(--blue);box-shadow:0 1px 3px rgba(0,0,0,.08);cursor:pointer}
+.stat .num{font-size:24px;font-weight:800}
+.stat .lbl{font-size:11.5px;color:var(--gray);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
+.stat.green{border-color:var(--green)} .stat.green .num{color:var(--green)}
+.stat.red{border-color:var(--red)} .stat.red .num{color:var(--red)}
+.stat.amber{border-color:var(--amber)} .stat.amber .num{color:var(--amber)}
+.stat.gray{border-color:var(--gray)} .stat.gray .num{color:var(--gray)}
+
+/* ===== Alerts ===== */
+.alertbox{border-radius:10px;padding:10px 14px;margin-bottom:12px;font-size:13px;display:flex;gap:8px;align-items:flex-start}
+.alertbox.red{background:var(--red-bg);border:1px solid #f5c6c2;color:#a50e0e}
+.alertbox.amber{background:var(--amber-bg);border:1px solid #f3e2a9;color:#8a6d00}
+.alertbox.blue{background:var(--blue-bg);border:1px solid #c4d7f5;color:#174ea6}
+
+/* ===== Permit cards ===== */
+.cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.pcard{background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.1);padding:14px;border-top:6px solid var(--gray);display:flex;flex-direction:column;gap:8px}
+.pcard.st-active{border-top-color:var(--green);background:linear-gradient(180deg,#f3fbf5 0,#fff 60px)}
+.pcard.st-expired{border-top-color:var(--red);background:linear-gradient(180deg,#fdf1f0 0,#fff 60px)}
+.pcard.st-draft{border-top-color:var(--amber)}
+.pcard.st-submitted{border-top-color:var(--blue)}
+.pcard.st-wsa_approved{border-top-color:#00897b;background:linear-gradient(180deg,#e0f2f1 0,#fff 60px)}
+.pcard.st-closed{border-top-color:var(--gray);opacity:.92}
+.pcard.st-rejected{border-top-color:#7b1fa2}
+.pcard .top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pno{font-weight:800;font-size:15px;color:var(--navy)}
+.badge{font-size:10.5px;font-weight:700;padding:3px 10px;border-radius:12px;text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+.badge.active{background:var(--green-bg);color:var(--green)}
+.badge.expired{background:var(--red-bg);color:var(--red)}
+.badge.draft{background:var(--amber-bg);color:#8a6d00}
+.badge.submitted{background:var(--blue-bg);color:var(--blue)}
+.badge.wsa_approved{background:#e0f2f1;color:#00695c}
+.badge.closed{background:var(--gray-bg);color:var(--gray)}
+.badge.rejected{background:#f3e5f5;color:#7b1fa2}
+.chips{display:flex;flex-wrap:wrap;gap:4px}
+.chip{background:var(--blue-bg);color:var(--navy);font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.pcard .meta{font-size:12px;color:var(--gray);line-height:1.55}
+.pcard .meta b{color:var(--ink)}
+.expinfo{font-size:11.5px;font-weight:700}
+.expinfo.ok{color:var(--green)} .expinfo.warn{color:#b06000} .expinfo.over{color:var(--red)}
+.apprline{font-size:11.5px;font-weight:700;color:var(--green)}
+.pendline{font-size:11.5px;font-weight:700;color:var(--blue)}
+.pcard .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:auto;padding-top:6px;border-top:1px dashed var(--border)}
+.btn{border:none;border-radius:7px;padding:7px 12px;font-size:12px;font-weight:700;background:var(--gray-bg);color:var(--ink)}
+.btn:hover{filter:brightness(.95)}
+.btn.primary{background:var(--navy);color:#fff}
+.btn.green{background:var(--green);color:#fff}
+.btn.red{background:var(--red);color:#fff}
+.btn.blue{background:var(--blue);color:#fff}
+.btn.amber{background:var(--amber);color:#fff}
+.btn.outline{background:#fff;border:1.5px solid var(--border)}
+.btn.big{padding:11px 20px;font-size:13.5px;border-radius:9px}
+.btn:disabled{opacity:.5;cursor:not-allowed}
+.empty{text-align:center;color:var(--gray);padding:50px 10px;background:#fff;border-radius:12px}
+.empty .ico{font-size:40px;margin-bottom:8px}
+.pager{display:flex;justify-content:center;align-items:center;gap:10px;margin:16px 0}
+.pager .pinfo{font-size:12px;color:var(--gray);font-weight:600}
+
+.fab{position:fixed;right:18px;bottom:18px;background:var(--navy);color:#fff;border:none;border-radius:28px;padding:14px 20px;font-size:14px;font-weight:700;box-shadow:0 4px 14px rgba(13,59,102,.45);z-index:45}
+
+/* ===== Reports / admin tables ===== */
+.tablewrap{background:#fff;border-radius:12px;overflow:auto;box-shadow:0 1px 4px rgba(0,0,0,.1)}
+.rtable{width:100%;border-collapse:collapse;font-size:12.5px;min-width:680px}
+.rtable th{background:var(--navy);color:#fff;padding:9px 10px;text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+.rtable td{padding:8px 10px;border-bottom:1px solid var(--gray-bg)}
+.rtable tr:hover td{background:#f8fafc}
+.toolrow{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}
+.adminbox{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.1);margin-bottom:14px}
+.adminbox h4{color:var(--navy);margin-bottom:10px}
+.adminbox .frm{display:flex;flex-wrap:wrap;gap:8px;align-items:flex-end;margin-bottom:12px}
+.adminbox .frm label{font-size:10.5px;font-weight:800;text-transform:uppercase;color:var(--gray);display:block;margin-bottom:3px}
+.adminbox .frm input,.adminbox .frm select{border:1.5px solid var(--border);border-radius:7px;padding:8px;font-size:13px}
+.deptchip{display:inline-flex;align-items:center;gap:6px;background:var(--blue-bg);color:var(--navy);font-weight:700;font-size:12px;border-radius:14px;padding:5px 12px;margin:0 6px 6px 0}
+.deptchip button{border:none;background:none;color:var(--red);font-weight:800;font-size:13px}
+
+/* ===== Form (paper look) ===== */
+.formwrap{background:#fff;max-width:980px;margin:0 auto;border:2px solid var(--paper-border);padding:10px 12px 18px}
+.fhead{display:flex;border:2px solid var(--paper-border);align-items:stretch}
+.fhead .pg{border-right:2px solid var(--paper-border);padding:6px 8px;font-size:11px;font-weight:700;display:flex;align-items:center;white-space:nowrap}
+.fhead .ttl{flex:1;text-align:center;font-size:20px;font-weight:900;letter-spacing:2px;padding:6px;display:flex;align-items:center;justify-content:center}
+.fhead .lg{border-left:2px solid var(--paper-border);padding:4px 10px;display:flex;flex-direction:column;justify-content:center;align-items:center}
+.fhead .lg .e{font-weight:900;font-size:17px;letter-spacing:3px;border:2px solid var(--paper-border);padding:1px 7px}
+.fhead .lg .t{font-size:7.5px;letter-spacing:1px;margin-top:2px}
+.typesrow{display:flex;flex-wrap:wrap;border:2px solid var(--paper-border);border-top:none;padding:7px 8px;gap:5px 14px;align-items:flex-start}
+.typebox{display:flex;align-items:flex-start;gap:5px;font-size:10.5px;font-weight:700;text-transform:uppercase;line-height:1.25;cursor:pointer;max-width:120px}
+.typebox input{width:15px;height:15px;flex:none;margin-top:1px;accent-color:var(--navy)}
+.permitno{margin-left:auto;font-size:11px;font-weight:700;text-align:right}
+.permitno .no{font-size:17px;color:var(--red);font-family:'Courier New',monospace;letter-spacing:1px}
+.frow{display:flex;flex-wrap:wrap;border:2px solid var(--paper-border);border-top:none}
+.fcell{flex:1;min-width:230px;padding:6px 8px;border-right:2px solid var(--paper-border)}
+.fcell:last-child{border-right:none}
+.fcell label{font-size:10.5px;font-weight:800;text-transform:uppercase;display:block;margin-bottom:3px;letter-spacing:.3px}
+.fcell input,.fcell textarea,.fcell select{width:100%;border:none;border-bottom:1px dotted #555;padding:4px 2px;outline:none;background:transparent;font-size:13.5px}
+.fcell textarea{resize:vertical;min-height:36px;border:1px dotted #777;padding:5px}
+.fcell input[readonly]{color:#333;background:#f4f4f4}
+.secbar{background:#3f3f3f;color:#fff;text-align:center;font-weight:800;font-size:12.5px;letter-spacing:1px;padding:5px;text-transform:uppercase;margin-top:12px;border:2px solid var(--paper-border);border-bottom:none}
+.secnote{font-size:11px;padding:5px 8px;border:2px solid var(--paper-border);border-top:none;border-bottom:none;background:#fafafa}
+
+/* PPE table */
+.ppegrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));border:2px solid var(--paper-border);border-top:1px solid var(--paper-border)}
+.ppeitem{display:flex;align-items:center;border-bottom:1px solid #888;border-right:1px solid #888;min-height:34px}
+.ppeitem .nm{flex:1;font-size:11px;font-weight:700;text-transform:uppercase;padding:4px 7px}
+.ppeitem .nm input{border:none;border-bottom:1px dotted #555;outline:none;width:100%;font-size:11px}
+.yna{display:flex;gap:3px;padding:3px 6px}
+.yna button{border:1.5px solid #999;background:#fff;border-radius:5px;padding:3px 9px;font-size:11px;font-weight:800;color:#777}
+.yna button.selY{background:var(--green);border-color:var(--green);color:#fff}
+.yna button.selNA{background:#757575;border-color:#757575;color:#fff}
+.yna button.selN{background:var(--red);border-color:var(--red);color:#fff}
+
+/* Checklist */
+.chk{border:2px solid var(--paper-border);border-top:none}
+.chk .chead{display:flex;background:#e8e8e8;border-bottom:1.5px solid var(--paper-border)}
+.chk .chead .no{width:34px;border-right:1.5px solid var(--paper-border);font-weight:800;font-size:11px;display:flex;align-items:center;justify-content:center}
+.chk .chead .qt{flex:1;text-align:center;font-weight:800;font-size:12.5px;padding:5px;text-transform:uppercase;letter-spacing:.5px}
+.chk .chead .ans{width:150px;border-left:1.5px solid var(--paper-border);font-weight:800;font-size:10px;display:flex;align-items:center;justify-content:center;text-align:center}
+.qrow{display:flex;border-bottom:1px solid #999;align-items:stretch}
+.qrow:last-child{border-bottom:none}
+.qrow .no{width:34px;border-right:1.5px solid var(--paper-border);display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700}
+.qrow .qt{flex:1;padding:5px 8px;font-size:12px;display:flex;align-items:center}
+.qrow .ans{width:150px;border-left:1.5px solid var(--paper-border);display:flex;align-items:center;justify-content:center;padding:3px}
+.chk.disabled{opacity:.62}
+.chk.disabled .chead .qt::after{content:" — NOT APPLICABLE (AUTO)";color:var(--red);font-size:9.5px}
+.naauto{font-size:10.5px;font-weight:800;color:#757575;border:1.5px solid #999;border-radius:5px;padding:3px 10px;background:#eee}
+
+/* Signatures */
+.siggrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));border:2px solid var(--paper-border);border-top:none}
+.sigbox{border-right:1.5px solid var(--paper-border);border-bottom:1.5px solid var(--paper-border);padding:7px}
+.sigbox h4{font-size:11px;text-transform:uppercase;letter-spacing:.3px}
+.sigbox .d{font-size:9.5px;color:#444;margin:2px 0 5px;line-height:1.3}
+.sigbox input,.sigbox select{width:100%;border:none;border-bottom:1px dotted #555;outline:none;font-size:12.5px;padding:3px 2px;margin-bottom:5px;background:transparent}
+.sigbox input[readonly]{background:#f4f4f4;color:#333;font-weight:700}
+.sigpad{border:1.5px dashed #888;border-radius:5px;background:#fcfcfc;width:100%;height:80px;touch-action:none;display:block}
+.sigtools{display:flex;justify-content:space-between;align-items:center;margin-top:3px}
+.sigtools small{font-size:9.5px;color:var(--gray)}
+.sigtools button{border:none;background:none;color:var(--blue);font-size:11px;font-weight:700}
+.apprbox{border:2px solid var(--green);border-radius:7px;background:var(--green-bg);padding:10px;text-align:center;font-weight:800;color:var(--green);font-size:13px;min-height:80px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+.apprbox small{font-weight:600;font-size:10.5px;color:#185c2c}
+.pendbox{border:2px dashed var(--blue);border-radius:7px;background:var(--blue-bg);padding:10px;text-align:center;font-weight:700;color:var(--blue);font-size:12px;min-height:80px;display:flex;flex-direction:column;justify-content:center;gap:3px}
+
+.persons{border:2px solid var(--paper-border);border-top:none;padding:8px}
+.persons .declare{font-size:11.5px;font-style:italic;margin-bottom:8px}
+.prow{display:grid;grid-template-columns:1.4fr .6fr 1fr .9fr auto;gap:6px;margin-bottom:6px;align-items:center}
+.prow input{border:1px solid #aaa;border-radius:5px;padding:6px;font-size:12.5px;width:100%}
+.prow .del{background:var(--red-bg);color:var(--red);border:none;border-radius:5px;padding:6px 9px;font-weight:800}
+.plabels{display:grid;grid-template-columns:1.4fr .6fr 1fr .9fr auto;gap:6px;font-size:9.5px;font-weight:800;text-transform:uppercase;color:var(--gray);margin-bottom:3px}
+.emerg{background:#3f3f3f;color:#fff;text-align:center;font-weight:800;font-size:12px;padding:6px;letter-spacing:.5px;border:2px solid var(--paper-border);margin-top:12px;text-transform:uppercase}
+.formfoot{font-size:10.5px;margin-top:8px;color:#333;display:flex;justify-content:space-between}
+
+.formactions{position:sticky;bottom:0;background:#fff;border-top:2px solid var(--border);padding:10px;display:flex;flex-wrap:wrap;gap:8px;justify-content:center;z-index:30;box-shadow:0 -2px 10px rgba(0,0,0,.08)}
+
+/* toast */
+#toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:#323232;color:#fff;padding:11px 22px;border-radius:24px;font-size:13px;z-index:600;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center}
+#toast.show{opacity:1}
+
+/* modal */
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;z-index:120;padding:14px}
+.modal.show{display:flex}
+.mbox{background:#fff;border-radius:14px;padding:20px;max-width:480px;width:100%;max-height:88vh;overflow:auto}
+.mbox h3{margin-bottom:10px;color:var(--navy)}
+.mbox label{font-size:12px;font-weight:700;display:block;margin:9px 0 3px}
+.mbox input,.mbox textarea,.mbox select{width:100%;border:1.5px solid var(--border);border-radius:7px;padding:8px;font-size:13px}
+.mbox .mrow{display:flex;gap:8px;justify-content:flex-end;margin-top:15px}
+.syncstat{font-size:11px;padding:3px 9px;border-radius:10px;background:rgba(255,255,255,.15);white-space:nowrap}
+
+@media(max-width:640px){
+  .appbar{padding:8px 10px}
+  .tabs{top:96px}
+  .fhead .ttl{font-size:14px;letter-spacing:1px}
+  .prow,.plabels{grid-template-columns:1fr 1fr;}
+  .plabels{display:none}
+  .prow input{font-size:12px}
+  .qrow .ans,.chk .chead .ans{width:118px}
+  .formwrap{padding:6px}
+}
+
+/* ===== PRINT (A4) ===== */
+#printArea{display:none}
+@media print{
+  body *{visibility:hidden}
+  body{background:#fff}
+  #printArea,#printArea *{visibility:visible}
+  #printArea{display:block;position:absolute;left:0;top:0;width:210mm;font-family:Arial,sans-serif;color:#000}
+  .ppage{width:210mm;min-height:295mm;padding:8mm 9mm;page-break-after:always;position:relative}
+  .ppage:last-child{page-break-after:auto}
+  @page{size:A4;margin:0}
+}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginScreen">
+  <div class="loginbox">
+    <span class="lg">E.N.P.A.Y</span>
+    <div class="sub">PTW – Safe Working Permission</div>
+    <div class="err" id="loginErr"></div>
+    <input id="li_user" placeholder="👤 Username" autocomplete="username">
+    <input id="li_pass" type="password" placeholder="🔑 Password" autocomplete="current-password" onkeydown="if(event.key==='Enter')Auth.login()">
+    <button onclick="Auth.login()">LOGIN</button>
+    <div class="hint">Admin creates departments &amp; users (max 100).</div>
+  </div>
+</div>
+
+<header class="appbar">
+  <div class="logo"><span class="enp">E.N.P.A.Y</span>
+    <span>PTW SYSTEM<span class="sub">SAFE WORKING PERMISSION</span></span>
+  </div>
+  <span class="userchip" id="userChip" style="display:none"></span>
+  <span class="syncstat" id="syncStat">⬤ Local</span>
+  <div class="searchwrap">
+    <input id="searchBox" type="search" placeholder="🔍 Search permit no, company…" oninput="App.onSearch(this.value)">
+    <button class="iconbtn" title="Change my password" onclick="Auth.openPwd()">🔑</button>
+    <button class="iconbtn" title="Firebase / Cloud settings" onclick="App.openSettings()">⚙</button>
+    <button class="iconbtn" title="Notifications" onclick="App.askNotify()">🔔</button>
+    <button class="iconbtn" title="Logout" onclick="Auth.logout()">⎋</button>
+  </div>
+</header>
+
+<nav class="tabs" id="tabs">
+  <button class="tab active" data-v="dash" onclick="App.go('dash')">🏠 Dashboard</button>
+  <button class="tab" data-v="active" onclick="App.go('active')">🟢 Active <span class="cnt" id="cntActive">0</span></button>
+  <button class="tab" data-v="closed" onclick="App.go('closed')">⬛ Closed <span class="cnt" id="cntClosed">0</span></button>
+  <button class="tab" data-v="reports" onclick="App.go('reports')">📊 Reports</button>
+  <button class="tab" data-v="admin" id="adminTab" style="display:none" onclick="App.go('admin')">👥 Admin</button>
+</nav>
+
+<main class="container" id="view"></main>
+
+<button class="fab" id="fab" onclick="App.newPermit()">＋ New Permit</button>
+
+<div id="toast"></div>
+
+<!-- Settings modal -->
+<div class="modal" id="settingsModal">
+  <div class="mbox">
+    <h3>⚙ Cloud Sync (Firebase Realtime Database)</h3>
+    <p style="font-size:12px;color:var(--gray)">Paste your Firebase web config JSON (with <b>databaseURL</b>) to enable Realtime Database sync &amp; FCM push. Leave empty for offline-only. Sync is fully delta-based: indexed <i>child_added / child_changed / child_removed</i> listeners, compact records (~1&nbsp;KB), no root reads, echo-suppression, archive for old records.</p>
+    <p style="font-size:11px;color:var(--gray);background:var(--gray-bg);border-radius:7px;padding:8px">Paste these rules in Firebase Console &rarr; Realtime Database &rarr; Rules:<br><code style="font-size:10px">{ "rules": { ".read": true, ".write": true, "permits": { "active": { ".indexOn": ["u","st","n"] }, "archive": { "$y": { ".indexOn": ["u"] } } } } }</code></p>
+    <div id="usagePanel" style="border:1.5px solid var(--border);border-radius:9px;padding:10px;margin:8px 0"></div>
+    <label>Firebase Config (JSON)</label>
+    <textarea id="fbConfig" rows="6" placeholder='{"apiKey":"...","authDomain":"...","projectId":"...","messagingSenderId":"...","appId":"..."}'></textarea>
+    <label>FCM VAPID Key (optional, for push)</label>
+    <input id="fbVapid" placeholder="BBx....">
+    <div class="mrow">
+      <button class="btn outline" onclick="App.closeModal('settingsModal')">Cancel</button>
+      <button class="btn blue" onclick="App.syncNow()" id="syncNowBtn">⟳ Sync Now</button>
+      <button class="btn primary" onclick="App.saveSettings()">Save &amp; Connect</button>
+    </div>
+  </div>
+</div>
+
+<!-- Reject reason modal -->
+<div class="modal" id="rejectModal">
+  <div class="mbox">
+    <h3>Reject Permit</h3>
+    <label>Reason for rejection</label>
+    <textarea id="rejectReason" rows="3" placeholder="State the reason…"></textarea>
+    <div class="mrow">
+      <button class="btn outline" onclick="App.closeModal('rejectModal')">Cancel</button>
+      <button class="btn red" onclick="App.confirmReject()">Reject Permit</button>
+    </div>
+  </div>
+</div>
+
+<!-- Change password modal -->
+<div class="modal" id="pwdModal">
+  <div class="mbox">
+    <h3>🔑 Change My Password</h3>
+    <label>Current password</label>
+    <input id="pw_old" type="password">
+    <label>New password (min 4 chars)</label>
+    <input id="pw_new" type="password">
+    <label>Confirm new password</label>
+    <input id="pw_new2" type="password">
+    <div class="mrow">
+      <button class="btn outline" onclick="App.closeModal('pwdModal')">Cancel</button>
+      <button class="btn primary" onclick="Auth.changePwd()">Update Password</button>
+    </div>
+  </div>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+/* ============================================================
+   PTW – Safe Working Permission App (ENPAY form FR-4.4.6-07/B)
+   Multi-user (1 admin + up to 100 users) with departments,
+   role-based workflow, offline-first + optional Firestore sync
+   ============================================================ */
+"use strict";
+
+/* ---------------- SAFE STORAGE SHIM ----------------
+   Sandboxed previews (iframe without allow-same-origin) throw a
+   SecurityError on localStorage access, which would kill the whole app.
+   Fall back to an in-memory store so the app ALWAYS runs (data simply
+   won't persist across reloads in such previews). */
+const LS = (function(){
+  try{
+    const t="__ptw_test__";
+    window.localStorage.setItem(t,"1");
+    window.localStorage.removeItem(t);
+    return window.localStorage;
+  }catch(e){
+    console.warn("localStorage unavailable – using in-memory storage (preview mode)");
+    const mem={};
+    return {
+      getItem:k=>(k in mem?mem[k]:null),
+      setItem:(k,v)=>{mem[k]=String(v);},
+      removeItem:k=>{delete mem[k];}
+    };
+  }
+})();
+
+/* ---------------- MASTER DATA ---------------- */
+const TYPES = [
+  { k:"GEN",  label:"GENERAL WORK" },
+  { k:"HOT",  label:"HOT OPERATION" },
+  { k:"RES",  label:"RESTRICTED ENTERING THE SITE" },
+  { k:"HAZ",  label:"DANGEROUS MATERIAL LINE OPENING/CUTTING" },
+  { k:"LOTO", label:"LOCK OUT TAG OUT" },
+  { k:"HGT",  label:"AT HEIGHT WORKING" },
+  { k:"PIT",  label:"PIT EXCAVATION WORKS" },
+  { k:"ENV",  label:"ENVIRONMENT EFFECT" }
+];
+
+const PPE = [
+  "SAFETY SHOES","HELMET","GOGGLES","FACE SHIELD","GLOVES","EAR PROTECTION",
+  "DUST MASK","GAS MASK","FIRE EXTINGUISHER","SCAFFOLD","LADDER","SAFETY SIGNS"
+];
+
+const CHECKLISTS = {
+  HOT: { title:"HOT PROCESS", q:[
+    "All flammable materials moved away? (At least 10 meters)",
+    "Are materials that are not movable protected via fire proof materials?",
+    "If the floor is ignitable, is water sprayed on the floor or covered with fire proof materials?",
+    "Are hose, manometer and flame arrestors of the oxy-acetylene welding system compatible?",
+    "Are oxy-acetylene tanks fixed and compatible?",
+    "Is the welding system and power cables compatible?",
+    "Are fire extinguishers ready and working?",
+    "Is there a fire observer assigned? (Name and Surname : ………………………………)",
+    "Are precautions taken to prevent sparks going down to the lower floors?",
+    "Is dangerous material flow to the work site stopped?",
+    "Is the area restricted against pedestrians? Are barriers or warning bands placed?",
+    "Are screens in place against welding rays?",
+    "Are lines containing flammable materials closed and sealed?",
+    "Is Pipe, tank or container hot work will be applied on are cleaned completely?"
+  ]},
+  RES: { title:"ENTERING THE RESTRICTED SITE", q:[
+    "Has the restricted area been cleaned? (For tank, container, silo etc.)",
+    "Are toxic and explosive gas measurements taken?",
+    "Is additional forced ventilation required?",
+    "Is respiration equipment required? Is the type determined?",
+    "Are electrical devices completely isolated (exproof) in restricted areas that may contain flammable/explosive gas?",
+    "Is an observer assigned? Is the person informed based on the work? (Name and Surname :……………………)",
+    "Is LOTO procedure applied to electricity and other energy sources?",
+    "Are rescue equipment ready for emergencies? (Based on the work, crane, rope, belt, mask etc.)"
+  ]},
+  HAZ: { title:"HAZARDOUS MATERIAL LINE CUTTING", q:[
+    "Is it certainly known what goes through the pipeline? (If not, do not start working..!)",
+    "Is LOTO applied on related machinery and equipment (pump, valves, compressor etc.)?",
+    "Is LOTO applied on drained pipe valves?",
+    "Is the line insulated at the cut location?",
+    "If two sided flow is available, is the flow stopped on both sides?",
+    "Is the line de-pressurized and completely drained of the liquid in the line?",
+    "Is LOTO removed as applicable after the work is completed?",
+    "For opening operation, are connections done and sealed as applicable?"
+  ]},
+  LOTO:{ title:"LOCK OUT - TAG OUT", q:[
+    "Is the system completely separated and de-energized?",
+    "Electricity, hydraulics, pneumatic power sources are locked out and tagged out appropriately?",
+    "Are related electricity switches locked out and tagged out appropriately?",
+    "Are the lock keys are collected by one personnel?",
+    "Are the equipment used for validating de-energization checked?",
+    "Is it verified that the system or the equipment is de-energized?",
+    "Are grounding and short circuiting completed?",
+    "Are other equipment that may be left energized screened with insulating material?",
+    "Is LOTO removed as applicable after the work is completed?"
+  ]},
+  HGT: { title:"WORKING AT HEIGHT", q:[
+    "Is the ladder intact and conforms standards? (shall not be wooden)",
+    "Is the ladder at least three steps longer than the working location?",
+    "Is the safety belt in align with the standards and sturdy? Is it fastened to a stable and appropriate location?",
+    "Is the ladder stabilized on the floor and on the upper end of the ladder?",
+    "Is the equipment and rails intact (scaffolding, platform, basket etc.)? (Rails height shall be at least 100)",
+    "Is safety belt attachable to the moving platform baskets?",
+    "Are double rope belts and strap on hard hat are being used while working at height?",
+    "Are scaffolding, platform or working equipment fixed to the floor steadily?",
+    "If the scaffolding is metal, is it grounded? (If built at flammable environments or electrical tools will be used on the scaffolding)",
+    "Is the scaffolding, platform or the working basket has skirting?",
+    "Is the scaffolding or the platform operation floor is covered or fixed with no gaps?",
+    "Is the scaffolding control card placed?",
+    "Is the crane lifting equipment or work equipment being inspected regularly? Is the operator licensed?",
+    "Are fragile spots on the roof (glass roof, ventilation duct etc) protected?",
+    "Are there side rails on the roof? Or are there any locations to fasten belts?",
+    "Is roof access restricted during rain or wind?"
+  ]},
+  PIT: { title:"PIT - EXCAVATION WORKS", q:[
+    "Are locations of the infrastructure where the excavation will be commenced (power, pipeline etc.) determined?",
+    "In deep excavations (>1.2m) are side walls supported / beveled??",
+    "During the excavations that construction machinery performs, is access restriction applied to machine working area?",
+    "Are pits covered with sturdy covers or is access restricted?",
+    "Is the pit completely restricted against foot traffic and does it include the outer perimeter of the pit?",
+    "Are temporary covers used to cover the pits withstand the load of passing over it (human, vehicle etc.)?",
+    "Are inappropriate materials (wood, plywood, cardboard etc.) as temporary cover used?"
+  ]},
+  ENV: { title:"ENVIRONMENT IMPACT", q:[
+    "During the work, is there a possibility that a solid, liquid or gas waste will be generated?",
+    "Will hazardous waste (asbestos, waste oil, waste paint etc.) be generated? (These shall be collected separately and shall be marked)",
+    "Is there a possibility for chemical substance spillage? Are there any related precautions?",
+    "Are there any precautions against chemical spillage (tray, non-porous nylon, absorbent etc.)?",
+    "Are there precautions against greenhouse effect (CO2, Nox, SF6 etc.) or CFC gases?",
+    "Are noisy work (>80 Db) being prevented being completed in off hours? (The rate on the nearest office/workshop)"
+  ]}
+};
+
+const PAGE_SIZE = 9, REPORT_PAGE = 15, MAX_USERS = 100;
+const DAY = 24*60*60*1000;
+const SESSION_TIMEOUT = 30*60*1000;   // auto-logout after 30 min inactivity
+
+/* ---------------- STORAGE (with in-memory cache: parse once, not per call) ---------------- */
+const Store = {
+  _cache:null,
+  load(){
+    if(Store._cache) return Store._cache;
+    try{ Store._cache = JSON.parse(LS.getItem("ptw_permits")||"[]"); }catch(e){ Store._cache = []; }
+    return Store._cache;
+  },
+  saveAll(list){ Store._cache = list; LS.setItem("ptw_permits", JSON.stringify(list)); },
+  settings(){ try{ return JSON.parse(LS.getItem("ptw_settings")||"{}"); }catch(e){ return {}; } },
+  saveSettings(s){ LS.setItem("ptw_settings", JSON.stringify(s)); },
+  users(){ try{ return JSON.parse(LS.getItem("ptw_users")||"[]"); }catch(e){ return []; } },
+  saveUsers(u){ LS.setItem("ptw_users", JSON.stringify(u)); FB.pushDirectory(); },
+  depts(){ try{ return JSON.parse(LS.getItem("ptw_depts")||"[]"); }catch(e){ return []; } },
+  saveDepts(d){ LS.setItem("ptw_depts", JSON.stringify(d)); FB.pushDirectory(); },
+  archiveList(){ try{ return JSON.parse(LS.getItem("ptw_archive")||"[]"); }catch(e){ return []; } },
+  saveArchive(l){ LS.setItem("ptw_archive", JSON.stringify(l)); },
+  nextNo(){
+    const y = new Date().getFullYear();
+    let c = JSON.parse(LS.getItem("ptw_counter")||"{}");
+    if(c.year!==y){ c={year:y,n:0}; }
+    c.n++;
+    LS.setItem("ptw_counter", JSON.stringify(c));
+    return `PTW-${y}-${String(c.n).padStart(4,"0")}`;
+  }
+};
+
+/* ---------------- AUTH / USERS ---------------- */
+const hashPwd = s => { let h=5381; for(let i=0;i<s.length;i++) h=((h<<5)+h+s.charCodeAt(i))>>>0; return "h"+h.toString(36)+s.length; };
+
+const Auth = {
+  user:null,
+  init(){
+    // seed default admin + sample departments on first run
+    if(!Store.users().length){
+      Store.saveUsers([{ id:"u_admin", username:"admin", name:"Administrator", dept:"Administration", role:"admin", pass:hashPwd("admin123") }]);
+    }
+    if(!Store.depts().length){
+      Store.saveDepts(["Safety","Production","Maintenance","Electrical","Quality"]);
+    }
+    const ses = LS.getItem("ptw_session");
+    if(ses){
+      const u = Store.users().find(x=>x.username===ses);
+      if(u){ Auth.enter(u); return; }
+    }
+    document.getElementById("loginScreen").style.display="flex";
+  },
+  login(){
+    const un = $("#li_user").value.trim().toLowerCase();
+    const pw = $("#li_pass").value;
+    const u = Store.users().find(x=>x.username.toLowerCase()===un);
+    if(!u || u.pass!==hashPwd(pw)){ $("#loginErr").textContent="Invalid username or password"; return; }
+    LS.setItem("ptw_session", u.username);
+    $("#loginErr").textContent=""; $("#li_pass").value="";
+    Auth.enter(u);
+  },
+  enter(u){
+    Auth.user = u;
+    document.getElementById("loginScreen").style.display="none";
+    const chip = $("#userChip");
+    chip.style.display="flex";
+    chip.innerHTML = `👤 ${esc(u.name)} <span class="dp">${esc(u.dept)}${u.role==="admin"?" • ADMIN":""}</span>`;
+    $("#adminTab").style.display = u.role==="admin" ? "" : "none";
+    App.go("dash");
+    toast(`Welcome, ${u.name}`);
+  },
+  logout(){
+    LS.removeItem("ptw_session");
+    Auth.user=null;
+    location.reload();
+  },
+  isAdmin(){ return Auth.user?.role==="admin"; },
+  isSafety(){ return Auth.isAdmin() || /safety/i.test(Auth.user?.dept||""); },
+  openPwd(){ if(!Auth.user) return; $("#pw_old").value=$("#pw_new").value=$("#pw_new2").value=""; $("#pwdModal").classList.add("show"); },
+  changePwd(){
+    const u = Store.users().find(x=>x.username===Auth.user.username);
+    if(u.pass!==hashPwd($("#pw_old").value)){ alert("Current password is wrong"); return; }
+    const n1=$("#pw_new").value, n2=$("#pw_new2").value;
+    if(n1.length<4){ alert("New password must be at least 4 characters"); return; }
+    if(n1!==n2){ alert("New passwords do not match"); return; }
+    u.pass = hashPwd(n1);
+    const list = Store.users(); const i=list.findIndex(x=>x.username===u.username); list[i]=u;
+    Store.saveUsers(list);
+    Auth.user = u;
+    App.closeModal("pwdModal");
+    toast("🔑 Password updated");
+  }
+};
+
+/* ============================================================
+   FIREBASE REALTIME DATABASE – OPTIMISED FOR 10,000+ RECORDS
+   ------------------------------------------------------------
+   • No root-level reads: only /permits/active (windowed query),
+     /permits/archive/<year> (on demand), /meta/* single nodes.
+   • child_added / child_changed / child_removed listeners on an
+     INDEXED query (orderByChild "u" = updatedAt) so only records
+     changed since last sync are ever downloaded (delta sync).
+   • First-ever load fetches just the newest CLOUD_PAGE records
+     (limitToLast), older records page in on demand.
+   • Records stored as COMPACT slim docs (short keys, packed
+     checklists/PPE, LZW-compressed long text, empty fields
+     stripped, NO images/signatures/PDFs) → ~0.6–1.2 KB each.
+   • Echo-suppression: after we push, the resulting child_changed
+     event is ignored (no duplicate download of our own write).
+   • Old closed/rejected permits are ARCHIVED to
+     /permits/archive/<year>/ and removed from the active node.
+   • Every byte up/down is metered → usage shown in ⚙ Settings.
+   Recommended security rules (paste in Firebase console):
+   {"rules":{"permits":{"active":{".indexOn":["u","st","n"]},
+   "archive":{"$y":{".indexOn":["u"]}}}}}
+   ============================================================ */
+const CLOUD_PAGE = 100;            // records per cloud fetch (50–100)
+const ARCHIVE_AFTER_DAYS = 30;     // closed/rejected older than this → archive
+
+/* ---------------- DEFAULT FIREBASE CONFIG ----------------
+   Used automatically on first run. The admin can still edit /
+   override it via ⚙ Settings → Firebase Config (saved to localStorage). */
+const DEFAULT_FB_CONFIG = {
+  apiKey: "AIzaSyCigNV3mSrbJvqHJXFGEZ8xrGdLoSRHAts",
+  authDomain: "maintenanace-27701.firebaseapp.com",
+  databaseURL: "https://maintenanace-27701-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "maintenanace-27701",
+  storageBucket: "maintenanace-27701.firebasestorage.app",
+  messagingSenderId: "640258565300",
+  appId: "1:640258565300:web:7923bd668f837c596563e1",
+  measurementId: "G-X0J1WCGRJN"
+};
+
+/* ---- tiny LZW compressor for long text (JSON/UTF-16 safe) ---- */
+const Z = {
+  MARK:"\u0001",
+  comp(s){
+    if(!s || s.length<160) return s;
+    const dict={}; let next=256, out=[], w="";
+    for(let i=0;i<256;i++) dict[String.fromCharCode(i)]=i;
+    for(const ch of s){
+      const wc=w+ch;
+      if(dict[wc]!==undefined) w=wc;
+      else{ out.push(dict[w]); if(next<0xD7FF) dict[wc]=next++; w=ch; }
+    }
+    if(w) out.push(dict[w]);
+    const packed = Z.MARK + out.map(c=>String.fromCharCode(c)).join("");
+    return packed.length < s.length ? packed : s;   // keep only if smaller
+  },
+  decomp(s){
+    if(!s || s[0]!==Z.MARK) return s||"";
+    const codes=[...s.slice(1)].map(c=>c.charCodeAt(0));
+    const dict={}; let next=256;
+    for(let i=0;i<256;i++) dict[i]=String.fromCharCode(i);
+    let w=dict[codes[0]], out=w;
+    for(let i=1;i<codes.length;i++){
+      const k=codes[i];
+      const entry = dict[k]!==undefined ? dict[k] : w+w[0];
+      out+=entry;
+      if(next<0xD7FF) dict[next++]=w+entry[0];
+      w=entry;
+    }
+    return out;
+  }
+};
+
+/* ---- Codec: full permit <-> slim cloud doc (essential fields only) ---- */
+const ANS2C = {"Y":"Y","N":"N","NA":"A","":"_"};
+const C2ANS = {"Y":"Y","N":"N","A":"NA","_":""};
+const Codec = {
+  encode(p){
+    const s = { i:p.id, st:p.status, u:p.updatedAt||Date.now(), ca:p.createdAt };
+    const put=(k,v)=>{ if(v!==""&&v!==0&&v!=null) s[k]=v; };
+    put("n",p.no); put("t",(p.types||[]).join(","));
+    put("d",Z.comp(p.desc||"")); put("c",p.company); put("l",p.location);
+    put("s",+new Date(p.start)); put("e",+new Date(p.expiry));
+    // PPE packed: one char per item + other
+    const ppe=PPE.map(e=>ANS2C[p.ppe?.[e]||""]).join("");
+    if(/[YNA]/.test(ppe)) s.pp=ppe;
+    put("po",p.otherPPE); put("pa",ANS2C[p.otherPPEAns||""]==="_"?"":ANS2C[p.otherPPEAns||""]);
+    // checklists packed: "HOT:YY_A;LOTO:..." – only sections with data
+    const ck=Object.keys(CHECKLISTS).map(k=>{
+      const row=(p.checks?.[k]||[]).map(a=>ANS2C[a]||"_").join("");
+      return /[YNA]/.test(row)? k+":"+row : null;
+    }).filter(Boolean).join(";");
+    put("ck",ck);
+    // check names (Name and Surname questions) – "HOT:7~John|RES:5~Jane"
+    const cn=Object.keys(p.checkNames||{}).map(key=>{const v=String(p.checkNames[key]||"").replace(/[~|]/g," ");return v?key+"~"+v:null;}).filter(Boolean).join("|");
+    put("cn",cn);
+    put("rm",Z.comp(p.remarks||""));
+    // persons compact: name~total~wc~exp | …
+    const pr=(p.persons||[]).filter(x=>x.name||x.total||x.wc)
+      .map(x=>[x.name,x.total,x.wc,x.wcExp].map(v=>String(v||"").replace(/[~|]/g," ")).join("~")).join("|");
+    put("pr",pr);
+    put("cb",p.createdBy); put("cbn",p.createdByName); put("cbd",p.createdByDept);
+    put("w",p.wsaDept);
+    put("ab",p.approvedBy); put("abn",p.approvedByName); put("abd",p.approvedByDept); put("aa",p.approvedAt);
+    put("sb",p.safetyBy); put("sbn",p.safetyByName); put("sa",p.safetyAt);
+    const cz=c=>c?[c.by,c.name,c.dept,c.at].join("~"):"";
+    put("cu",cz(p.closeUA)); put("cw",cz(p.closeWSA));
+    put("rn",(p.renewals||[]).length); put("rr",Z.comp(p.rejectReason||""));
+    return s; // NOTE: signatures/images intentionally NOT synced
+  },
+  decode(s){
+    const p = {
+      id:s.i, no:s.n||"", status:s.st||"draft",
+      types:s.t? s.t.split(",") : [],
+      desc:Z.decomp(s.d||""), company:s.c||"", location:s.l||"",
+      start:new Date(s.s||s.ca||Date.now()).toISOString(),
+      expiry:new Date(s.e||Date.now()).toISOString(),
+      ppe:{}, otherPPE:s.po||"", otherPPEAns:C2ANS[s.pa||"_"]||"",
+      checks:{}, persons:[], sigs:{},
+      renewals:Array.from({length:s.rn||0},()=>({at:0})),
+      rejectReason:Z.decomp(s.rr||""),
+      remarks:Z.decomp(s.rm||""),
+      createdBy:s.cb||"", createdByName:s.cbn||"", createdByDept:s.cbd||"",
+      wsaDept:s.w||"",
+      approvedBy:s.ab||"", approvedByName:s.abn||"", approvedByDept:s.abd||"", approvedAt:s.aa||0,
+      safetyBy:s.sb||"", safetyByName:s.sbn||"", safetyAt:s.sa||0,
+      closeUA:null, closeWSA:null,
+      createdAt:s.ca||Date.now(), updatedAt:s.u||Date.now()
+    };
+    PPE.forEach((e,i)=>p.ppe[e]=C2ANS[(s.pp||"")[i]||"_"]||"");
+    Object.keys(CHECKLISTS).forEach(k=>p.checks[k]=CHECKLISTS[k].q.map(()=> ""));
+    (s.ck||"").split(";").forEach(seg=>{
+      const [k,row]=seg.split(":");
+      if(k && CHECKLISTS[k] && row) p.checks[k]=CHECKLISTS[k].q.map((_,i)=>C2ANS[row[i]||"_"]||"");
+    });
+    p.checkNames={};
+    (s.cn||"").split("|").forEach(seg=>{const idx=seg.indexOf("~");if(idx>0)p.checkNames[seg.slice(0,idx)]=seg.slice(idx+1);});
+    p.persons=(s.pr? s.pr.split("|"):[]).map(r=>{const a=r.split("~");return{name:a[0]||"",total:a[1]||"",wc:a[2]||"",wcExp:a[3]||""};});
+    if(!p.persons.length) p.persons=[{name:"",total:"",wc:"",wcExp:""}];
+    const uz=v=>{ if(!v) return null; const a=v.split("~"); return {by:a[0],name:a[1],dept:a[2],at:+a[3]||0}; };
+    p.closeUA=uz(s.cu); p.closeWSA=uz(s.cw);
+    return p;
+  }
+};
+
+/* ---- usage meter ---- */
+const Usage = {
+  get(){ try{ return JSON.parse(LS.getItem("ptw_usage")||'{"up":0,"down":0,"reads":0,"writes":0}'); }catch(e){ return {up:0,down:0,reads:0,writes:0}; } },
+  add(dir,bytes,n){ const u=Usage.get(); u[dir]+=bytes; u[dir==="up"?"writes":"reads"]+=(n||1); LS.setItem("ptw_usage",JSON.stringify(u)); },
+  fmt(b){ return b<1024? b+" B" : b<1048576? (b/1024).toFixed(1)+" KB" : (b/1048576).toFixed(2)+" MB"; },
+  estimate(){
+    const act=Store.load(), arc=Store.archiveList();
+    const size=l=>l.reduce((s,p)=>s+JSON.stringify(Codec.encode(p)).length,0);
+    return { actN:act.length, arcN:arc.length, actB:size(act), arcB:size(arc) };
+  },
+  html(){
+    const u=Usage.get(), e=Usage.estimate();
+    return `<table style="width:100%;font-size:12px;border-collapse:collapse">
+      <tr><td style="padding:3px 0">☁ Est. cloud storage (active)</td><td style="text-align:right"><b>${Usage.fmt(e.actB)}</b> (${e.actN} records)</td></tr>
+      <tr><td style="padding:3px 0">🗄 Est. cloud storage (archive)</td><td style="text-align:right"><b>${Usage.fmt(e.arcB)}</b> (${e.arcN} records)</td></tr>
+      <tr><td style="padding:3px 0">⬆ Uploaded this device</td><td style="text-align:right"><b>${Usage.fmt(u.up)}</b> (${u.writes} writes)</td></tr>
+      <tr><td style="padding:3px 0">⬇ Downloaded this device</td><td style="text-align:right"><b>${Usage.fmt(u.down)}</b> (${u.reads} reads)</td></tr>
+      <tr><td style="padding:3px 0">Ø Avg record size</td><td style="text-align:right"><b>${e.actN?Usage.fmt(Math.round(e.actB/e.actN)):"—"}</b></td></tr>
+      <tr><td style="padding:3px 0;color:var(--gray)" colspan="2">Projection for 10,000 records ≈ <b>${Usage.fmt((e.actN?e.actB/e.actN:900)*10000)}</b> total storage</td></tr>
+    </table>`;
+  }
+};
+
+/* ---- Firebase Realtime Database sync engine ---- */
+const FB = {
+  db:null, messaging:null, ready:false, attached:false,
+  recent:{},            // id -> updatedAt we just pushed (echo suppression)
+  renderTimer:null,
+
+  async init(){
+    const s = Store.settings();
+    const cfg = s.fbConfig || DEFAULT_FB_CONFIG;
+    if(!cfg) return;
+    try{
+      await FB.loadSdk();
+      if(!firebase.apps.length) firebase.initializeApp(cfg);
+      FB.db = firebase.database();
+      FB.ready = true;
+      setSync("cloud");
+      if(s.vapid && firebase.messaging && firebase.messaging.isSupported && firebase.messaging.isSupported()){
+        try{
+          FB.messaging = firebase.messaging();
+          const tok = await FB.messaging.getToken({vapidKey:s.vapid});
+          if(tok){ console.log("FCM token:", tok); toast("FCM push registered ✔"); }
+        }catch(e){ console.warn("FCM:", e.message); }
+      }
+      FB.pullDirectory();
+      FB.attach();
+      FB.push();
+    }catch(e){ console.warn("Firebase init failed:", e); setSync("error"); }
+  },
+  loadSdk(){
+    if(window.firebase) return Promise.resolve();
+    const urls = [
+      "https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js",
+      "https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js",
+      "https://www.gstatic.com/firebasejs/9.23.0/firebase-messaging-compat.js"
+    ];
+    return urls.reduce((p,u)=>p.then(()=>new Promise((res,rej)=>{
+      const sc=document.createElement("script"); sc.src=u; sc.onload=res; sc.onerror=rej; document.head.appendChild(sc);
+    })), Promise.resolve());
+  },
+
+  /* live delta listeners – NEVER reads the whole node */
+  attach(){
+    if(!FB.ready || FB.attached) return;
+    FB.attached = true;
+    const s = Store.settings();
+    const since = s.lastSync || 0;
+    let q;
+    if(!since && !Store.load().length){
+      // brand-new device: only the newest CLOUD_PAGE records
+      q = FB.db.ref("permits/active").orderByChild("u").limitToLast(CLOUD_PAGE);
+    } else {
+      // returning device: ONLY records changed after last sync (indexed delta)
+      q = FB.db.ref("permits/active").orderByChild("u").startAt(since+1);
+    }
+    q.on("child_added",   snap=>FB.onRemote(snap));
+    q.on("child_changed", snap=>FB.onRemote(snap));
+    FB.db.ref("permits/active").on("child_removed", snap=>{
+      Usage.add("down", 40);
+      const id = snap.key;
+      const list = Store.load();
+      if(list.some(p=>p.id===id)){ Store.saveAll(list.filter(p=>p.id!==id)); FB.queueRender(); }
+    });
+  },
+  onRemote(snap){
+    const slim = snap.val(); if(!slim || !slim.i) return;
+    // echo suppression: skip events caused by our own push (no duplicate download cost in cache + no re-render churn)
+    if(FB.recent[slim.i] && FB.recent[slim.i]>=slim.u){ return; }
+    Usage.add("down", JSON.stringify(slim).length);
+    const remote = Codec.decode(slim);
+    const list = Store.load();
+    const i = list.findIndex(p=>p.id===remote.id);
+    if(i<0) list.push(remote);
+    else if((remote.updatedAt||0) > (list[i].updatedAt||0)){
+      remote.sigs = list[i].sigs||{}; // keep local-only data
+      list[i]=remote;
+    } else return;
+    Store.saveAll(list);
+    const s=Store.settings(); s.lastSync=Math.max(s.lastSync||0, slim.u||0); Store.saveSettings(s);
+    FB.queueRender();
+  },
+  queueRender(){
+    clearTimeout(FB.renderTimer);
+    FB.renderTimer = setTimeout(()=>App.refresh(), 350); // batch UI updates
+  },
+
+  /* push ONLY changed records, one multi-path update = 1 round trip */
+  async push(){
+    if(!FB.ready) return;
+    const list = Store.load();
+    const dirty = list.filter(p=>p.dirty);
+    if(!dirty.length) return;
+    try{
+      const updates={}; let bytes=0;
+      dirty.slice(0,200).forEach(p=>{
+        const slim = Codec.encode(p);
+        updates["permits/active/"+p.id]=slim;
+        bytes += JSON.stringify(slim).length;
+        FB.recent[p.id]=slim.u;
+      });
+      await FB.db.ref().update(updates);
+      Usage.add("up", bytes, dirty.length);
+      dirty.forEach(p=>delete p.dirty);
+      Store.saveAll(list);
+      const s=Store.settings(); s.lastSync=Math.max(s.lastSync||0, ...dirty.map(p=>p.updatedAt||0)); Store.saveSettings(s);
+      // prune echo table
+      const now=Date.now(); Object.keys(FB.recent).forEach(k=>{ if(now-FB.recent[k]>120000) delete FB.recent[k]; });
+    }catch(e){ console.warn("push:", e.message); setSync("error"); }
+  },
+  remove(id){
+    if(!FB.ready) return;
+    FB.db.ref("permits/active/"+id).remove().catch(()=>{});
+    Usage.add("up", 30);
+  },
+
+  /* archive: move old closed/rejected out of the active node */
+  async archiveOld(){
+    const cutoff = Date.now() - ARCHIVE_AFTER_DAYS*DAY;
+    const list = Store.load();
+    const old = list.filter(p=>["closed","rejected"].includes(p.status) && (p.closedAt||p.updatedAt) < cutoff);
+    if(!old.length){ toast(`No closed/rejected permits older than ${ARCHIVE_AFTER_DAYS} days`); return 0; }
+    // local move
+    const arc = Store.archiveList();
+    old.forEach(p=>{ delete p.dirty; arc.push(p); });
+    Store.saveArchive(arc);
+    Store.saveAll(list.filter(p=>!old.includes(p)));
+    // cloud move (single multi-path update)
+    if(FB.ready){
+      const updates={}; let bytes=0;
+      old.forEach(p=>{
+        const y = new Date(p.createdAt).getFullYear();
+        const slim = Codec.encode(p);
+        updates["permits/archive/"+y+"/"+p.id]=slim;
+        updates["permits/active/"+p.id]=null;
+        bytes += JSON.stringify(slim).length;
+      });
+      try{ await FB.db.ref().update(updates); Usage.add("up", bytes, old.length); }
+      catch(e){ console.warn("archive:", e.message); }
+    }
+    toast(`🗄 Archived ${old.length} old permit(s)`);
+    App.refresh();
+    return old.length;
+  },
+  /* on-demand archive fetch for one year (paged, never whole tree) */
+  async fetchArchive(year){
+    if(!FB.ready) return Store.archiveList();
+    try{
+      const snap = await FB.db.ref("permits/archive/"+year).orderByChild("u").limitToLast(CLOUD_PAGE).once("value");
+      const val = snap.val()||{};
+      Usage.add("down", JSON.stringify(val).length);
+      const arc = Store.archiveList();
+      Object.values(val).forEach(slim=>{
+        const p=Codec.decode(slim);
+        if(!arc.some(x=>x.id===p.id)) arc.push(p);
+      });
+      Store.saveArchive(arc);
+      return arc;
+    }catch(e){ console.warn("fetchArchive:", e.message); return Store.archiveList(); }
+  },
+
+  /* users + departments = ONE small node (1 read on boot, 1 write on change) */
+  async pushDirectory(){
+    if(!FB.ready) return;
+    try{
+      const doc={ users:Store.users(), depts:Store.depts(), updatedAt:Date.now() };
+      await FB.db.ref("meta/directory").set(doc);
+      Usage.add("up", JSON.stringify(doc).length);
+    }catch(e){ console.warn("dir push:", e.message); }
+  },
+  async pullDirectory(){
+    if(!FB.ready) return;
+    try{
+      const snap = await FB.db.ref("meta/directory").once("value");
+      const d = snap.val();
+      if(d){
+        Usage.add("down", JSON.stringify(d).length);
+        const localTs = +(LS.getItem("ptw_dir_ts")||0);
+        if((d.updatedAt||0) > localTs){
+          LS.setItem("ptw_users", JSON.stringify(d.users||[]));
+          LS.setItem("ptw_depts", JSON.stringify(d.depts||[]));
+          LS.setItem("ptw_dir_ts", String(d.updatedAt));
+        }
+      }
+    }catch(e){ console.warn("dir pull:", e.message); }
+  }
+};
+function setSync(mode){
+  const el = document.getElementById("syncStat");
+  if(mode==="cloud"){ el.textContent="⬤ Cloud ✔"; el.style.color="#7CFC9A"; }
+  else if(mode==="error"){ el.textContent="⬤ Sync err"; el.style.color="#ffb3ae"; }
+  else { el.textContent="⬤ Local"; el.style.color="#fff"; }
+}
+
+/* ---------------- HELPERS ---------------- */
+const $ = s=>document.querySelector(s);
+const esc = s=>String(s??"").replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(t._x); t._x=setTimeout(()=>t.classList.remove("show"),2800); }
+function fmtDT(iso){ if(!iso) return "—"; const d=new Date(iso); return d.toLocaleDateString("en-GB")+" "+d.toLocaleTimeString([],{hour:"2-digit",minute:"2-digit"}); }
+function fmtD(ts){ if(!ts) return "—"; return new Date(ts).toLocaleDateString("en-GB"); }
+function todayInput(){ const d=new Date(); d.setMinutes(d.getMinutes()-d.getTimezoneOffset()); return d.toISOString().slice(0,10); }
+/* now truncated to the current minute (datetime-local has no seconds),
+   so selecting "now" is not rejected a few seconds later */
+function nowMin(){ const d=new Date(); d.setSeconds(0,0); return d.getTime(); }
+
+function effStatus(p){
+  if(p.status==="approved") return (new Date(p.expiry).getTime() < Date.now()) ? "expired" : "active";
+  return p.status;
+}
+const ST_LABEL = {draft:"Draft", submitted:"Submitted", wsa_approved:"Safety Pending", active:"Active", expired:"Expired", closed:"Closed", rejected:"Rejected"};
+
+/* permission helpers */
+const Perm = {
+  canEdit(p){ return Auth.isAdmin() || p.createdBy===Auth.user?.username; },
+  canDelete(p){
+    if(Auth.isSafety()) return true;                            // Safety dept (and admin) – any permit
+    /* Creator may delete ONLY his own draft/pending permit while WSA has NOT approved yet */
+    return !!p && p.createdBy===Auth.user?.username &&
+           ["draft","submitted","rejected"].includes(p.status) && !p.approvedBy;
+  },
+  canRenew(){ return Auth.isSafety(); },                        // only Safety dept (and admin)
+  canApprove(p){ return Auth.isAdmin() || (Auth.user && Auth.user.dept===p.wsaDept); }, // stage 1: assigned WSA dept
+  canSafetyApprove(){ return Auth.isSafety(); },                // stage 2: Safety dept (and admin)
+  /* Job completion: Undertaking Authority dept (creator's dept) + WSA dept must BOTH close */
+  canCloseUA(p){ return Auth.isAdmin() || (Auth.user && Auth.user.dept===p.createdByDept); },
+  canCloseWSA(p){ return Auth.isAdmin() || (Auth.user && Auth.user.dept===p.wsaDept); }
+};
+
+function blankPermit(){
+  const start = new Date();
+  const exp = new Date(); exp.setHours(17,0,0,0);
+  if(exp < start) exp.setTime(start.getTime()+4*3600e3);
+  const p = {
+    id:"p"+Date.now()+Math.random().toString(36).slice(2,7),
+    no:"",                       // PERMIT No. generated on SUBMIT, not on draft
+    status:"draft",
+    types:[], desc:"", company:"", location:"",
+    start: start.toISOString(),
+    expiry: exp.toISOString(),
+    ppe:{}, otherPPE:"", otherPPEAns:"",
+    checks:{}, persons:[ {name:"", total:"", wc:"", wcExp:""} ],
+    sigs:{}, renewals:[], rejectReason:"", remarks:"", checkNames:{},
+    createdBy: Auth.user?.username||"", createdByName: Auth.user?.name||"", createdByDept: Auth.user?.dept||"",
+    wsaDept:"", approvedBy:"", approvedByName:"", approvedByDept:"", approvedAt:0,
+    safetyBy:"", safetyByName:"", safetyAt:0,
+    closeUA:null, closeWSA:null,
+    createdAt:Date.now(), updatedAt:Date.now(), dirty:true
+  };
+  PPE.forEach(e=>p.ppe[e]="");
+  Object.keys(CHECKLISTS).forEach(k=>p.checks[k]=CHECKLISTS[k].q.map(()=> ""));
+  return p;
+}
+function migrate(){
+  const list = Store.load(); let ch=false;
+  list.forEach(p=>{
+    if(p.createdBy===undefined){ p.createdBy="admin"; p.createdByName="Administrator"; ch=true; }
+    if(p.wsaDept===undefined){ p.wsaDept=""; ch=true; }
+    if(p.approvedBy===undefined){ p.approvedBy=""; p.approvedByName=""; p.approvedByDept=""; p.approvedAt=0; ch=true; }
+    if(p.safetyBy===undefined){ p.safetyBy=""; p.safetyByName=""; p.safetyAt=0; ch=true; }
+    if(p.createdByDept===undefined){
+      const u = Store.users().find(x=>x.username===p.createdBy);
+      p.createdByDept = u ? u.dept : ""; ch=true;
+    }
+    if(p.closeUA===undefined){ p.closeUA=null; p.closeWSA=null; ch=true; }
+    if(p.remarks===undefined){ p.remarks=""; ch=true; }
+    if(p.checkNames===undefined){ p.checkNames={}; ch=true; }
+    if(p.status==="closed" && !p.closeUA && !p.closeWSA){
+      p.closeUA = {by:p.createdBy||"admin", name:p.createdByName||"Administrator", dept:p.createdByDept||"—", at:p.closedAt||p.updatedAt};
+      p.closeWSA = {by:p.approvedBy||"admin", name:p.approvedByName||"Administrator", dept:p.wsaDept||"—", at:p.closedAt||p.updatedAt};
+      ch=true;
+    }
+    if(p.status==="approved" && !p.approvedByName){ p.approvedByName="Administrator"; p.approvedBy="admin"; p.approvedByDept=p.wsaDept||"—"; p.approvedAt=p.approvedAt||p.updatedAt; ch=true; }
+    if(p.status==="approved" && !p.safetyByName){ p.safetyByName="Administrator"; p.safetyBy="admin"; p.safetyAt=p.safetyAt||p.approvedAt||p.updatedAt; ch=true; }
+  });
+  if(ch) Store.saveAll(list);
+}
+function getPermit(id){ return Store.load().find(p=>p.id===id); }
+function upsert(p){
+  p.updatedAt = Date.now(); p.dirty = true;
+  const list = Store.load();
+  const i = list.findIndex(x=>x.id===p.id);
+  if(i<0) list.push(p); else list[i]=p;
+  Store.saveAll(list);
+  FB.push();
+}
+
+/* ---------------- APP ---------------- */
+const App = {
+  view:"dash", page:1, search:"", editing:null, rejectTarget:null, notified:{},
+
+  init(){
+    migrate();
+    Auth.init();
+    FB.init();
+    Notifier.start();
+    Session.start();
+    const s = Store.settings();
+    $("#fbConfig").value = JSON.stringify(s.fbConfig || DEFAULT_FB_CONFIG || "", null, 2);
+    if(s.vapid) $("#fbVapid").value = s.vapid;
+  },
+
+  go(v){
+    if(!Auth.user) return;
+    if(v==="admin" && !Auth.isAdmin()) return;
+    App.view = v; App.page = 1; App.editing = null;
+    document.querySelectorAll(".tab").forEach(t=>t.classList.toggle("active", t.dataset.v===v));
+    $("#fab").style.display = v==="admin" ? "none" : "";
+    App.render();
+    window.scrollTo(0,0);
+  },
+  refresh(){ if(!App.editing && Auth.user) App.render(); },
+  onSearch(v){ App.search = v.trim().toLowerCase(); App.page=1; if(App.editing) App.go("dash"); else App.render(); },
+  /* indexed cloud search by exact permit no (orderByChild "n") – fetches at most 1 record */
+  async cloudFind(no){
+    if(!FB.ready){ toast("Connect Firebase first"); return; }
+    try{
+      const snap = await FB.db.ref("permits/active").orderByChild("n").equalTo(no.toUpperCase()).limitToFirst(1).once("value");
+      const val = snap.val();
+      if(val){
+        Usage.add("down", JSON.stringify(val).length);
+        const slim = Object.values(val)[0];
+        const p = Codec.decode(slim);
+        const list = Store.load();
+        if(!list.some(x=>x.id===p.id)){ list.push(p); Store.saveAll(list); }
+        toast(`☁ Found ${p.no} in cloud`); App.render();
+      } else toast(`No record "${no}" in active cloud data (try archive year in Reports)`);
+    }catch(e){ toast("Cloud search failed: "+e.message); }
+  },
+
+  filtered(){
+    let list = Store.load().slice().sort((a,b)=>b.createdAt-a.createdAt);
+    if(App.search){
+      list = list.filter(p=>
+        (p.no||"").toLowerCase().includes(App.search) ||
+        (p.company||"").toLowerCase().includes(App.search) ||
+        (p.location||"").toLowerCase().includes(App.search) ||
+        (p.createdByName||"").toLowerCase().includes(App.search) ||
+        (p.desc||"").toLowerCase().includes(App.search));
+    }
+    return list;
+  },
+
+  counts(){
+    const all = Store.load();
+    const c = {total:all.length, draft:0, submitted:0, wsa_approved:0, active:0, expired:0, closed:0, rejected:0};
+    all.forEach(p=>c[effStatus(p)]++);
+    return c;
+  },
+
+  render(){
+    const c = App.counts();
+    $("#cntActive").textContent = c.active + c.expired;
+    $("#cntClosed").textContent = c.closed;
+    const v = $("#view");
+    if(App.view==="dash")    v.innerHTML = App.renderDash(c);
+    if(App.view==="active")  v.innerHTML = App.renderList(p=>["active","expired"].includes(effStatus(p)), "Active Permits", "No active permits. Create one with ＋ New Permit.");
+    if(App.view==="closed")  v.innerHTML = App.renderList(p=>effStatus(p)==="closed", "Closed Permits", "No closed permits yet.");
+    if(App.view==="reports") v.innerHTML = App.renderReports();
+    if(App.view==="admin")   v.innerHTML = Admin.html();
+  },
+
+  renderDash(c){
+    const exp = Store.load().filter(p=>effStatus(p)==="expired");
+    const dueToday = Store.load().filter(p=>{
+      if(effStatus(p)!=="active") return false;
+      return new Date(p.expiry).toDateString()===new Date().toDateString();
+    });
+    const myApprovals = Store.load().filter(p=>effStatus(p)==="submitted" && Perm.canApprove(p));
+    const mySafety = Store.load().filter(p=>effStatus(p)==="wsa_approved" && Perm.canSafetyApprove());
+    let alerts = "";
+    if(myApprovals.length) alerts += `<div class="alertbox blue">📥 <b>${myApprovals.length} permit(s) waiting for YOUR department's (WSA) approval:</b>&nbsp;${myApprovals.slice(0,5).map(p=>esc(p.no)).join(", ")}</div>`;
+    if(mySafety.length) alerts += `<div class="alertbox blue">🛡 <b>${mySafety.length} permit(s) waiting for SAFETY approval:</b>&nbsp;${mySafety.slice(0,5).map(p=>esc(p.no)).join(", ")}</div>`;
+    const myClosures = Store.load().filter(p=>{
+      const s = effStatus(p);
+      if(!["active","expired"].includes(s)) return false;
+      return (!p.closeUA && Perm.canCloseUA(p) && p.closeWSA) || (!p.closeWSA && Perm.canCloseWSA(p) && p.closeUA);
+    });
+    if(myClosures.length) alerts += `<div class="alertbox amber">🔒 <b>${myClosures.length} permit(s) waiting for YOUR department's closure:</b>&nbsp;${myClosures.slice(0,5).map(p=>esc(p.no)).join(", ")}</div>`;
+    if(exp.length) alerts += `<div class="alertbox red">🔔 <b>${exp.length} permit(s) EXPIRED</b>&nbsp;– ${Auth.isSafety()?"renew or close them":"contact Safety dept to renew"}: ${exp.slice(0,5).map(p=>esc(p.no)).join(", ")}</div>`;
+    if(dueToday.length) alerts += `<div class="alertbox amber">⏰ <b>Daily due alert:</b>&nbsp;${dueToday.length} permit(s) expire today: ${dueToday.slice(0,5).map(p=>esc(p.no)).join(", ")}</div>`;
+    return `
+      <div class="stats">
+        <div class="stat" onclick="App.go('reports')"><div class="num">${c.total}</div><div class="lbl">Total Permits</div></div>
+        <div class="stat green" onclick="App.go('active')"><div class="num">${c.active}</div><div class="lbl">Active</div></div>
+        <div class="stat red" onclick="App.go('active')"><div class="num">${c.expired}</div><div class="lbl">Expired</div></div>
+        <div class="stat amber"><div class="num">${c.draft+c.submitted+c.wsa_approved}</div><div class="lbl">Draft / Pending</div></div>
+        <div class="stat gray" onclick="App.go('closed')"><div class="num">${c.closed}</div><div class="lbl">Closed</div></div>
+      </div>
+      ${alerts}
+      <div class="toolrow">
+        <button class="btn primary big" onclick="App.newPermit()">＋ Create New Permit</button>
+        <button class="btn blue" onclick="App.go('active')">View Active Permits</button>
+        <button class="btn outline" onclick="App.go('reports')">📊 Permit Reports</button>
+      </div>
+      ${App.cardsHTML(App.filtered())}`;
+  },
+
+  renderList(filterFn, title, emptyMsg){
+    const list = App.filtered().filter(filterFn);
+    return `<h3 style="margin:4px 0 12px;color:var(--navy)">${title} (${list.length})</h3>` + App.cardsHTML(list, emptyMsg);
+  },
+
+  cardsHTML(list, emptyMsg){
+    if(!list.length){
+      const cloudBtn = App.search && FB.ready
+        ? `<br><button class="btn blue" style="margin-top:10px" onclick="App.cloudFind('${esc(App.search.toUpperCase())}')">☁ Search cloud by permit no (indexed)</button>` : "";
+      return `<div class="empty"><div class="ico">📋</div>${emptyMsg||"No permits found."}${cloudBtn}</div>`;
+    }
+    const pages = Math.max(1, Math.ceil(list.length/PAGE_SIZE));
+    if(App.page>pages) App.page=pages;
+    const slice = list.slice((App.page-1)*PAGE_SIZE, App.page*PAGE_SIZE);
+    let html = `<div class="cards">` + slice.map(App.cardHTML).join("") + `</div>`;
+    if(pages>1) html += `
+      <div class="pager">
+        <button class="btn outline" ${App.page<=1?"disabled":""} onclick="App.page--;App.render()">‹ Prev</button>
+        <span class="pinfo">Page ${App.page} / ${pages} (${list.length} permits)</span>
+        <button class="btn outline" ${App.page>=pages?"disabled":""} onclick="App.page++;App.render()">Next ›</button>
+      </div>`;
+    return html;
+  },
+
+  cardHTML(p){
+    const st = effStatus(p);
+    const msLeft = new Date(p.expiry).getTime() - Date.now();
+    let expLine = "";
+    if(st==="active"){
+      const h = Math.floor(msLeft/3600e3), m = Math.floor((msLeft%3600e3)/60000);
+      expLine = `<div class="expinfo ${msLeft<DAY?"warn":"ok"}">⏳ Expires in ${h>=24?Math.floor(h/24)+"d ":""}${h%24}h ${m}m</div>`;
+    } else if(st==="expired"){
+      const h = Math.floor(-msLeft/3600e3);
+      expLine = `<div class="expinfo over">⛔ Expired ${h>=24?Math.floor(h/24)+"d ":""}${h%24}h ago</div>`;
+    }
+    const chips = p.types.map(k=>{const t=TYPES.find(x=>x.k===k);return `<span class="chip">${t?esc(t.label):k}</span>`;}).join("") || `<span class="chip" style="background:#eee;color:#888">No type</span>`;
+    let acts = `<button class="btn outline" onclick="App.openPermit('${p.id}')">📝 Open</button>`;
+    if(st==="draft" && Perm.canEdit(p)) acts += `<button class="btn blue" onclick="App.quick('${p.id}','submit')">Submit</button>`;
+    if(st==="submitted" && Perm.canApprove(p)) acts += `<button class="btn green" onclick="App.quick('${p.id}','approve')">✔ WSA Approve</button><button class="btn red" onclick="App.askReject('${p.id}')">✖ Reject</button>`;
+    if(st==="wsa_approved" && Perm.canSafetyApprove()) acts += `<button class="btn green" onclick="App.quick('${p.id}','safety_approve')">🛡 Safety Approve</button><button class="btn red" onclick="App.askReject('${p.id}')">✖ Reject</button>`;
+    if(["active","expired"].includes(st)){
+      if(!p.closeUA && Perm.canCloseUA(p)) acts += `<button class="btn" onclick="App.quick('${p.id}','close_ua')">🔒 Close (UA)</button>`;
+      if(!p.closeWSA && Perm.canCloseWSA(p)) acts += `<button class="btn" onclick="App.quick('${p.id}','close_wsa')">🔒 Close (WSA)</button>`;
+    }
+    if(st==="expired" && Perm.canRenew()) acts += `<button class="btn green" onclick="App.quick('${p.id}','renew')">🔄 Renew (1 day)</button>`;
+    if(st==="rejected" && Perm.canEdit(p)) acts += `<button class="btn blue" onclick="App.quick('${p.id}','submit')">Re-submit</button>`;
+    if(["draft","rejected"].includes(st) && Perm.canDelete(p)) acts += `<button class="btn red" onclick="App.del('${p.id}')">Delete</button>`;
+    else if(Perm.canDelete(p) && st!=="active") acts += `<button class="btn red" onclick="App.del('${p.id}')">🗑</button>`;
+    acts += `<button class="btn outline" onclick="App.print('${p.id}')">🖨</button>`;
+    let apprLine = "";
+    if(p.approvedByName) apprLine += `<div class="apprline">✔ WSA approved by ${esc(p.approvedByName)} (${esc(p.approvedByDept)})</div>`;
+    else if(st==="submitted") apprLine += `<div class="pendline">⏳ Awaiting WSA approval: ${esc(p.wsaDept||"no dept assigned")}</div>`;
+    if(p.safetyByName) apprLine += `<div class="apprline">🛡 Safety approved by ${esc(p.safetyByName)}</div>`;
+    else if(st==="wsa_approved") apprLine += `<div class="pendline">🛡 Awaiting SAFETY approval (draft/pending)</div>`;
+    if(p.closeUA) apprLine += `<div class="apprline">🔒 UA closed by ${esc(p.closeUA.name)}</div>`;
+    if(p.closeWSA) apprLine += `<div class="apprline">🔒 WSA closed by ${esc(p.closeWSA.name)}</div>`;
+    if((p.closeUA||p.closeWSA) && st!=="closed"){
+      const waiting = p.closeUA ? `WSA (${esc(p.wsaDept)})` : `UA (${esc(p.createdByDept)})`;
+      apprLine += `<div class="pendline">⏳ Waiting for ${waiting} closure</div>`;
+    }
+    return `
+      <div class="pcard st-${st}">
+        <div class="top"><span class="pno">${esc(p.no)||'<i style="color:#999;font-weight:600">No. on submit</i>'}</span><span class="badge ${st}">${ST_LABEL[st]}</span></div>
+        <div class="chips">${chips}</div>
+        <div class="meta">
+          <b>${esc(p.desc||"(no description)")}</b><br>
+          🏢 ${esc(p.company||"—")} &nbsp; 📍 ${esc(p.location||"—")}<br>
+          ✍ Created by: <b>${esc(p.createdByName||"—")}</b> &nbsp; 🏬 WSA Dept: <b>${esc(p.wsaDept||"—")}</b><br>
+          🕒 Start: ${fmtDT(p.start)}<br>
+          🕒 Expiry: ${fmtDT(p.expiry)} ${p.renewals.length?`<span style="color:var(--blue)">(renewed ×${p.renewals.length})</span>`:""}
+        </div>
+        ${apprLine}
+        ${expLine}
+        ${st==="rejected"&&p.rejectReason?`<div class="expinfo over">Reason: ${esc(p.rejectReason)}</div>`:""}
+        <div class="acts">${acts}</div>
+      </div>`;
+  },
+
+  /* ---------- actions ---------- */
+  newPermit(){
+    const p = blankPermit();
+    upsert(p);
+    App.openPermit(p.id);
+  },
+  del(id){
+    const p = getPermit(id); if(!p) return;
+    if(!Perm.canDelete(p)){
+      if(p.createdBy===Auth.user?.username && p.approvedBy)
+        toast("⛔ Cannot delete – WSA has already approved this permit. Only Safety dept can delete it.");
+      else if(p.createdBy===Auth.user?.username)
+        toast("⛔ You can delete only your draft/pending permits (before WSA approval)");
+      else
+        toast("⛔ Only Safety department (or the creator, before WSA approval) can delete permits");
+      return;
+    }
+    if(!confirm("Delete this permit?")) return;
+    Store.saveAll(Store.load().filter(p=>p.id!==id));
+    FB.remove(id);
+    toast("Permit deleted"); App.render();
+  },
+  quick(id, action){
+    const p = getPermit(id); if(!p) return;
+    if(action==="submit"){
+      if(!Perm.canEdit(p)){ toast("⛔ Only the creator can submit this permit"); return; }
+      if(new Date(p.start).getTime()<nowMin()){ toast("⚠ Start date/time cannot be in the past"); App.openPermit(id); return; }
+      if(new Date(p.expiry).getTime()<nowMin()){ toast("⚠ Expiry date/time cannot be in the past"); App.openPermit(id); return; }
+      if(!p.wsaDept){ toast("⚠ Open the permit and assign Work Site Authority department first"); App.openPermit(id); return; }
+      if(!p.no) p.no = Store.nextNo();          // PERMIT No. generated on first submit
+      p.status="submitted"; p.rejectReason="";
+      p.approvedBy=""; p.approvedByName=""; p.approvedByDept=""; p.approvedAt=0;
+      p.safetyBy=""; p.safetyByName=""; p.safetyAt=0;
+      toast(`${p.no} submitted → awaiting ${p.wsaDept} approval`);
+    }
+    if(action==="approve"){
+      if(!Perm.canApprove(p)){ toast(`⛔ Only ${p.wsaDept||"assigned"} department users can approve this permit`); return; }
+      p.status="wsa_approved"; p.approvedAt=Date.now();
+      p.approvedBy=Auth.user.username; p.approvedByName=Auth.user.name; p.approvedByDept=Auth.user.dept;
+      toast(`${p.no} WSA approved by ${Auth.user.name} → awaiting SAFETY approval`);
+    }
+    if(action==="safety_approve"){
+      if(!Perm.canSafetyApprove()){ toast("⛔ Only Safety department can give final approval"); return; }
+      if(p.status!=="wsa_approved"){ toast("⚠ Work Site Authority must approve first"); return; }
+      p.status="approved"; p.safetyAt=Date.now();
+      p.safetyBy=Auth.user.username; p.safetyByName=Auth.user.name;
+      if(new Date(p.expiry)<new Date()){ p.expiry=new Date(Date.now()+DAY).toISOString(); }
+      toast(`${p.no} SAFETY APPROVED by ${Auth.user.name} – now ACTIVE`);
+    }
+    if(action==="close_ua"){
+      if(!Perm.canCloseUA(p)){ toast(`⛔ Only ${p.createdByDept||"Undertaking Authority"} dept users can give Undertaking Authority closure`); return; }
+      if(p.closeUA){ toast("Already closed by Undertaking Authority side"); return; }
+      if(!confirm("Undertaking Authority closure:\nThe work is completed, the working site is delivered clean and safe?")) return;
+      p.closeUA = {by:Auth.user.username, name:Auth.user.name, dept:Auth.user.dept, at:Date.now()};
+      App.finishClose(p);
+    }
+    if(action==="close_wsa"){
+      if(!Perm.canCloseWSA(p)){ toast(`⛔ Only ${p.wsaDept||"WSA"} dept users can give Work Site Authority closure`); return; }
+      if(p.closeWSA){ toast("Already closed by Work Site Authority side"); return; }
+      if(!confirm("Work Site Authority closure:\nThe work is completed, the working site is received clean and safe?")) return;
+      p.closeWSA = {by:Auth.user.username, name:Auth.user.name, dept:Auth.user.dept, at:Date.now()};
+      App.finishClose(p);
+    }
+    if(action==="renew"){
+      if(!Perm.canRenew()){ toast("⛔ Only Safety department can renew permits"); return; }
+      p.renewals.push({at:Date.now(), oldExpiry:p.expiry, by:Auth.user.name});
+      p.expiry=new Date(Date.now()+DAY).toISOString(); p.status="approved";
+      toast(`${p.no} renewed by Safety – active for 1 day`);
+    }
+    upsert(p); App.render();
+  },
+  finishClose(p){
+    if(p.closeUA && p.closeWSA){
+      p.status="closed"; p.closedAt=Date.now();
+      toast(`${p.no} CLOSED – both departments confirmed ✔`);
+    } else {
+      const waiting = p.closeUA ? `Work Site Authority (${p.wsaDept})` : `Undertaking Authority (${p.createdByDept})`;
+      toast(`Closure recorded by ${Auth.user.name}. Waiting for ${waiting} closure.`);
+    }
+  },
+  askReject(id){
+    const p=getPermit(id);
+    const ok = (p.status==="submitted" && Perm.canApprove(p)) ||
+               (p.status==="wsa_approved" && Perm.canSafetyApprove()) ||
+               Auth.isAdmin();
+    if(!ok){ toast(p.status==="wsa_approved" ? "⛔ Only Safety department can reject at this stage" : `⛔ Only ${p.wsaDept||"assigned"} department can reject`); return; }
+    App.rejectTarget=id; $("#rejectReason").value=""; $("#rejectModal").classList.add("show");
+  },
+  confirmReject(){
+    const p = getPermit(App.rejectTarget); if(!p) return;
+    p.status="rejected"; p.rejectReason=$("#rejectReason").value.trim()||"Not specified";
+    upsert(p); App.closeModal("rejectModal"); toast(`${p.no} rejected`); App.render();
+  },
+  closeModal(id){ document.getElementById(id).classList.remove("show"); },
+
+  openSettings(){
+    if(!Auth.isAdmin()){ toast("⛔ Admin only"); return; }
+    $("#usagePanel").innerHTML = `<b style="font-size:12px;color:var(--navy)">📊 Estimated Firebase usage</b>` + Usage.html();
+    $("#settingsModal").classList.add("show");
+  },
+  saveSettings(){
+    const s = Store.settings();
+    const raw = $("#fbConfig").value.trim();
+    if(raw){
+      try{ s.fbConfig = JSON.parse(raw); }
+      catch(e){ alert("Invalid JSON config"); return; }
+    } else delete s.fbConfig;
+    s.vapid = $("#fbVapid").value.trim();
+    Store.saveSettings(s);
+    App.closeModal("settingsModal");
+    toast("Settings saved"); FB.init();
+  },
+  syncNow(){ if(!FB.ready){ toast("Connect Firebase first"); return;} FB.push(); toast("⟳ Pushed local changes – live listeners keep pulls automatic"); },
+  resetAll(){
+    if(!confirm("Reset the app?\nThis clears ALL local permits, users and settings and reloads fresh demo data.")) return;
+    ["ptw_permits","ptw_users","ptw_depts","ptw_settings","ptw_counter","ptw_session",
+     "ptw_seeded","ptw_seeded_v2","ptw_seed_closed","ptw_dir_ts","ptw_archive","ptw_usage"].forEach(k=>LS.removeItem(k));
+    location.reload();
+  },
+  askNotify(){ Notifier.request(); },
+
+  openPermit(id){
+    App.editing = id;
+    const p = getPermit(id); if(!p) return;
+    $("#fab").style.display="none";
+    document.querySelectorAll(".tab").forEach(t=>t.classList.remove("active"));
+    $("#view").innerHTML = Form.html(p);
+    Form.bind(p);
+    window.scrollTo(0,0);
+  },
+  print(id){ Print.run(getPermit(id)); },
+};
+
+/* ---------------- ADMIN PANEL ---------------- */
+const Admin = {
+  html(){
+    const users = Store.users(), depts = Store.depts();
+    return `
+    <h3 style="margin:4px 0 12px;color:var(--navy)">👥 Admin – Users &amp; Departments</h3>
+    <div class="adminbox">
+      <h4>🏬 Departments</h4>
+      <div>${depts.map(d=>`<span class="deptchip">${esc(d)} ${d.toLowerCase()==="safety"?"🛡":""}<button title="Remove" onclick="Admin.delDept('${esc(d)}')">✕</button></span>`).join("")||"<i>No departments</i>"}</div>
+      <div class="frm" style="margin-top:10px">
+        <div><label>New department name</label><input id="ad_dept" placeholder="e.g. Mechanical"></div>
+        <button class="btn primary" onclick="Admin.addDept()">＋ Add Department</button>
+      </div>
+      <small style="color:var(--gray)">🛡 Users in the <b>Safety</b> department can delete &amp; renew permits.</small>
+    </div>
+    <div class="adminbox">
+      <h4>🧹 Maintenance</h4>
+      <button class="btn red" onclick="App.resetAll()">⟲ Reset app &amp; reload demo data</button>
+      <small style="color:var(--gray);display:block;margin-top:6px">Clears all local permits, users, departments &amp; settings, then reloads with fresh demo data (incl. 1 closed permit for print demo). Use this if old data from a previous version behaves incorrectly.</small>
+    </div>
+    <div class="adminbox">
+      <h4>👤 Users (${users.length} / ${MAX_USERS})</h4>
+      <div class="frm">
+        <div><label>Full name</label><input id="au_name" placeholder="e.g. Ramesh Kumar"></div>
+        <div><label>Username</label><input id="au_user" placeholder="e.g. ramesh"></div>
+        <div><label>Department</label><select id="au_dept">${depts.map(d=>`<option>${esc(d)}</option>`).join("")}</select></div>
+        <div><label>Password</label><input id="au_pass" type="text" placeholder="min 4 chars"></div>
+        <button class="btn primary" onclick="Admin.addUser()">＋ Add User</button>
+      </div>
+      <div class="tablewrap"><table class="rtable">
+        <thead><tr><th>#</th><th>Name</th><th>Username</th><th>Department</th><th>Role</th><th>Actions</th></tr></thead>
+        <tbody>${users.map((u,i)=>`<tr>
+          <td>${i+1}</td><td><b>${esc(u.name)}</b></td><td>${esc(u.username)}</td>
+          <td>${esc(u.dept)} ${/safety/i.test(u.dept)?"🛡":""}</td>
+          <td>${u.role==="admin"?'<span class="badge active">ADMIN</span>':'<span class="badge submitted">USER</span>'}</td>
+          <td style="white-space:nowrap">
+            <button class="btn outline" onclick="Admin.resetPwd('${u.username}')">Reset Pwd</button>
+            ${u.role!=="admin"?`<button class="btn red" onclick="Admin.delUser('${u.username}')">✕</button>`:""}
+          </td></tr>`).join("")}
+        </tbody></table></div>
+    </div>`;
+  },
+  addDept(){
+    const d = $("#ad_dept").value.trim();
+    if(!d){ toast("Enter department name"); return; }
+    const list = Store.depts();
+    if(list.some(x=>x.toLowerCase()===d.toLowerCase())){ toast("Department already exists"); return; }
+    list.push(d); Store.saveDepts(list); toast(`Department "${d}" added`); App.render();
+  },
+  delDept(d){
+    if(Store.users().some(u=>u.dept===d)){ toast("⛔ Department has users – move them first"); return; }
+    if(!confirm(`Remove department "${d}"?`)) return;
+    Store.saveDepts(Store.depts().filter(x=>x!==d)); App.render();
+  },
+  addUser(){
+    const name=$("#au_name").value.trim(), un=$("#au_user").value.trim().toLowerCase(),
+          dept=$("#au_dept").value, pass=$("#au_pass").value;
+    if(!name||!un||!pass){ toast("Fill name, username and password"); return; }
+    if(pass.length<4){ toast("Password min 4 characters"); return; }
+    const users = Store.users();
+    if(users.length>=MAX_USERS){ toast(`⛔ User limit reached (${MAX_USERS})`); return; }
+    if(users.some(u=>u.username.toLowerCase()===un)){ toast("Username already taken"); return; }
+    users.push({ id:"u"+Date.now(), username:un, name, dept, role:"user", pass:hashPwd(pass) });
+    Store.saveUsers(users); toast(`User "${name}" added (${dept})`); App.render();
+  },
+  delUser(un){
+    if(!confirm(`Delete user "${un}"?`)) return;
+    Store.saveUsers(Store.users().filter(u=>u.username!==un)); App.render();
+  },
+  resetPwd(un){
+    const np = prompt(`New password for "${un}" (min 4 chars):`);
+    if(!np || np.length<4){ if(np!==null) toast("Min 4 characters"); return; }
+    const users = Store.users(); const u=users.find(x=>x.username===un);
+    u.pass = hashPwd(np); Store.saveUsers(users); toast(`Password reset for ${un}`);
+  }
+};
+
+/* ---------------- FORM RENDER ---------------- */
+const Form = {
+  SIGN_KEYS:[], // all signature boxes replaced by auto-generated name stamps
+  html(p){
+    const st = effStatus(p);
+    const editable = Perm.canEdit(p) && p.status!=="closed";
+    const ro = !editable;
+    const startVal = (d=>{d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);})(new Date(p.start));
+    const expVal   = (d=>{d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);})(new Date(p.expiry));
+    const nowLocal = (d=>{d.setSeconds(0,0);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);})(new Date());
+    const depts = Store.depts();
+    const wsaBox = p.approvedByName
+      ? `<div class="apprbox">✔ APPROVED BY<br>${esc(p.approvedByName.toUpperCase())}<small>${esc(p.approvedByDept)} Department • ${fmtDT(new Date(p.approvedAt).toISOString())}</small></div>`
+      : `<div class="pendbox">⏳ PENDING APPROVAL<br><small>Assigned department: <b>${esc(p.wsaDept||"— not assigned —")}</b><br>Only ${esc(p.wsaDept||"assigned")} dept users can approve.</small></div>`;
+    const osaBox = p.safetyByName
+      ? `<div class="apprbox">🛡 APPROVED BY<br>${esc(p.safetyByName.toUpperCase())}<small>Safety Department • ${fmtDT(new Date(p.safetyAt).toISOString())}</small></div>`
+      : `<div class="pendbox">🛡 PENDING SAFETY APPROVAL<br><small>${p.status==="wsa_approved"?"WSA approved – awaiting Safety final approval.<br>Permit stays draft/pending until Safety approves.":"Safety approves after Work Site Authority approval."}</small></div>`;
+    return `
+    <div style="display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap">
+      <button class="btn outline" onclick="App.go('dash')">← Back</button>
+      <span class="badge ${st}">${ST_LABEL[st]}</span>
+      ${p.renewals.length?`<span class="chip">Renewed ×${p.renewals.length}</span>`:""}
+      ${ro?`<span class="chip" style="background:#eee;color:#666">READ ONLY${p.status==="closed"?" (closed)":" (not your permit)"}</span>`:""}
+    </div>
+    <div class="formwrap" id="pform" ${ro?'style="pointer-events:none;opacity:.88"':""}>
+      <div class="fhead">
+        <div class="pg">PAGE: 1 / 2</div>
+        <div class="ttl">SAFE WORKING PERMISSION</div>
+        <div class="lg"><span class="e">E.N.P.A.Y</span><span class="t">Transformer Components</span></div>
+      </div>
+      <div class="typesrow">
+        ${TYPES.map(t=>`
+          <label class="typebox"><input type="checkbox" data-type="${t.k}" ${p.types.includes(t.k)?"checked":""}>
+          <span>${t.label}</span></label>`).join("")}
+        <div class="permitno">PERMIT No.<br><span class="no">${esc(p.no)||"— — — —"}</span>${p.no?"":'<br><small style="color:#999;font-weight:600">auto-generated on submit</small>'}</div>
+      </div>
+      <div class="frow">
+        <div class="fcell" style="flex:2"><label>Description of the Work :</label>
+          <textarea id="f_desc" rows="2">${esc(p.desc)}</textarea></div>
+        <div class="fcell"><label>Undertaking Company :</label><input id="f_company" value="${esc(p.company)}"></div>
+      </div>
+      <div class="frow">
+        <div class="fcell"><label>Work Location :</label><input id="f_location" value="${esc(p.location)}"></div>
+        <div class="fcell"><label>Permit Start Date/Time (auto) :</label><input id="f_start" type="datetime-local" value="${startVal}" min="${nowLocal}" onchange="Form.onStartDateChange()"></div>
+        <div class="fcell"><label>Permit Expiry Date/Time (date auto) :</label><input id="f_expiry" type="datetime-local" value="${expVal}" min="${nowLocal}" onchange="Form.onExpiryDateChange()"></div>
+      </div>
+      <div class="frow">
+        <div class="fcell"><label>Created By (Undertaking Authority – auto) :</label>
+          <input value="${esc(p.createdByName)}" readonly></div>
+        <div class="fcell"><label>Work Site Authority Department (assign for approval) :</label>
+          <select id="f_wsadept">
+            <option value="">— Select department —</option>
+            ${depts.map(d=>`<option ${p.wsaDept===d?"selected":""}>${esc(d)}</option>`).join("")}
+          </select></div>
+      </div>
+
+      <div class="secbar">PROTECTIVE EQUIPMENT THAT MAY BE REQUIRED</div>
+      <div class="secnote">Mark the required based on the undertaken work. (This shall be filled by Occupational Safety Specialist.)</div>
+      <div class="ppegrid" id="ppegrid">
+        ${PPE.map((e,i)=>`
+          <div class="ppeitem"><span class="nm">${e}</span>${Form.yna("ppe",i,p.ppe[e])}</div>`).join("")}
+        <div class="ppeitem"><span class="nm" style="display:flex;gap:4px;align-items:center">OTHER:
+          <input id="f_otherppe" value="${esc(p.otherPPE)}" placeholder="please specify"></span>
+          ${Form.yna("ppe","other",p.otherPPEAns)}</div>
+      </div>
+
+      ${Object.keys(CHECKLISTS).map(k=>Form.checklist(k,p)).join("")}
+
+      <div class="secbar">ON THE JOB SIGNINGS (NAME / SIGNATURE)</div>
+      <div class="siggrid" style="grid-template-columns:repeat(auto-fit,minmax(260px,1fr))">
+        <div class="sigbox">
+          <h4>UNDERTAKING AUTHORITY</h4>
+          <div class="d">(The person responsible for the workers) I have readily been witness to filling this document and took required precautions. <b>Name auto-generated from permit creator.</b></div>
+          <div class="apprbox">✍ CREATED BY<br>${esc(p.createdByName.toUpperCase()||"—")}<small>${esc(p.createdByDept||"—")} Department • ${fmtDT(new Date(p.createdAt).toISOString())}</small></div>
+        </div>
+        <div class="sigbox">
+          <h4>WORK SITE AUTHORITY</h4>
+          <div class="d">Approval is given digitally by the assigned department user. Visible to all users after approval.</div>
+          ${wsaBox}
+        </div>
+        <div class="sigbox">
+          <h4>OCCUPATIONAL SAFETY AUTHORITY</h4>
+          <div class="d">Final approval by Safety department after Work Site Authority approval. Name auto-filled on Safety approval.</div>
+          ${osaBox}
+        </div>
+      </div>
+
+      <div class="secbar">ADDITIONAL REMARKS / INSTRUCTIONS</div>
+      <div class="persons" style="padding:10px">
+        <textarea id="f_remarks" rows="3" style="width:100%;border:1px solid #aaa;border-radius:6px;padding:8px;font-size:13px;resize:vertical;min-height:60px;font-family:inherit;background:#fff" placeholder="Enter any additional remarks or special instructions here…">${esc(p.remarks||"")}</textarea>
+      </div>
+
+      <div class="secbar">UNDERTAKING PERSONS</div>
+      <div class="persons">
+        <div class="declare">"I have understood the contents of this document and the hazardous nature of the work, I have taken required precautions and I shall apply them."</div>
+        <div class="plabels"><span>Person Name</span><span>Total Persons</span><span>WC Policy No.</span><span>Policy Expiry</span><span></span></div>
+        <div id="personRows">${p.persons.map((pr,i)=>Form.personRow(pr,i)).join("")}</div>
+        <button class="btn outline" type="button" onclick="Form.addPerson()">＋ Add Person</button>
+      </div>
+
+      <div class="secbar">JOB COMPLETION CLOSINGS</div>
+      <div class="siggrid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr))">
+        <div class="sigbox"><h4>UNDERTAKING AUTHORITY (${esc(p.createdByDept||"—")} Dept)</h4>
+          <div class="d">The work is completed, the working site is delivered clean and safe. Only ${esc(p.createdByDept||"creator's")} department users can close.</div>
+          ${p.closeUA
+            ? `<div class="apprbox">🔒 CLOSED BY<br>${esc(p.closeUA.name.toUpperCase())}<small>${esc(p.closeUA.dept)} Department • ${fmtDT(new Date(p.closeUA.at).toISOString())}</small></div>`
+            : `<div class="pendbox">⏳ NOT CLOSED YET<br><small>Awaiting Undertaking Authority dept closure.</small></div>`}
+        </div>
+        <div class="sigbox"><h4>WORK SITE AUTHORITY (${esc(p.wsaDept||"—")} Dept) <small style="font-weight:400">(Please send the form to occupational safety authority)</small></h4>
+          <div class="d">The work is completed, the working site is received clean and safe. Only ${esc(p.wsaDept||"assigned")} department users can close.</div>
+          ${p.closeWSA
+            ? `<div class="apprbox">🔒 CLOSED BY<br>${esc(p.closeWSA.name.toUpperCase())}<small>${esc(p.closeWSA.dept)} Department • ${fmtDT(new Date(p.closeWSA.at).toISOString())}</small></div>`
+            : `<div class="pendbox">⏳ NOT CLOSED YET<br><small>Awaiting Work Site Authority dept closure.</small></div>`}
+        </div>
+      </div>
+
+      <div class="emerg">IN AN EVENT OF AN EMERGENCY OR AN ACCIDENT, CALL OHS DEPT IMMEDIATELY!</div>
+      <div class="formfoot"><span>FR-4.4.6-07/B</span><span>${esc(p.no)||"DRAFT – no permit number yet"}</span></div>
+    </div>
+
+    <div class="formactions">
+      ${editable?`
+        <button class="btn amber big" onclick="Form.save('draft')">💾 Save Draft</button>
+        <button class="btn blue big" onclick="Form.save('submit')">📤 Submit Permit</button>`:""}
+      ${st==="submitted" && Perm.canApprove(p)?`
+        <button class="btn green big" onclick="App.quick('${p.id}','approve');App.openPermit('${p.id}')">✔ WSA Approve</button>
+        <button class="btn red big" onclick="App.askReject('${p.id}')">✖ Reject</button>`:""}
+      ${st==="wsa_approved" && Perm.canSafetyApprove()?`
+        <button class="btn green big" onclick="App.quick('${p.id}','safety_approve');App.openPermit('${p.id}')">🛡 Safety Approve</button>
+        <button class="btn red big" onclick="App.askReject('${p.id}')">✖ Reject</button>`:""}
+      ${st==="expired" && Perm.canRenew()?`<button class="btn green big" onclick="App.quick('${p.id}','renew');App.openPermit('${p.id}')">🔄 Renew (1 day)</button>`:""}
+      ${["active","expired"].includes(st) && !p.closeUA && Perm.canCloseUA(p)?`<button class="btn big" onclick="${editable?"Form.save(null);":""}App.quick('${p.id}','close_ua');App.openPermit('${p.id}')">🔒 Close – Undertaking Authority</button>`:""}
+      ${["active","expired"].includes(st) && !p.closeWSA && Perm.canCloseWSA(p)?`<button class="btn big" onclick="${editable?"Form.save(null);":""}App.quick('${p.id}','close_wsa');App.openPermit('${p.id}')">🔒 Close – Work Site Authority</button>`:""}
+      ${Perm.canDelete(p) && !["active","closed"].includes(st)?`<button class="btn red big" onclick="App.del('${p.id}');App.go('dash')">🗑 Delete</button>`:""}
+      <button class="btn primary big" onclick="${editable?`Form.save(null);`:""}App.print('${p.id}')">🖨 Print PDF (A4)</button>
+    </div>`;
+  },
+
+  yna(group,i,val){
+    return `<span class="yna" data-g="${group}" data-i="${i}">
+      <button type="button" data-v="Y"  class="${val==="Y"?"selY":""}">Y</button>
+      <button type="button" data-v="N"  class="${val==="N"?"selN":""}">N</button>
+      <button type="button" data-v="NA" class="${val==="NA"?"selNA":""}">NA</button></span>`;
+  },
+
+  checklist(k,p){
+    const enabled = p.types.includes(k);
+    const c = CHECKLISTS[k];
+    return `
+    <div class="secbar" style="background:${enabled?"#3f3f3f":"#9a9a9a"}">${c.title}</div>
+    <div class="chk ${enabled?"":"disabled"}" data-chk="${k}">
+      <div class="chead"><div class="no">NO</div><div class="qt">${c.title}</div><div class="ans">YES / NO / NOT APPLICABLE</div></div>
+      ${c.q.map((q,i)=>{
+        const isName=/name and surname/i.test(q);
+        const ans=p.checks[k][i];
+        const nm=p.checkNames?.[k+":"+i]||"";
+        return `
+        <div class="qrow"><div class="no">${i+1}</div><div class="qt">${q}</div>
+          <div class="ans">${enabled?Form.yna("chk:"+k,i,ans):`<span class="naauto">NA (auto)</span>`}</div>
+        </div>${isName&&enabled?`
+        <div class="namerow" data-for="${k}:${i}" style="display:${ans==="Y"?"flex":"none"};align-items:center;gap:8px;padding:6px 8px 6px 42px;background:#f6f9fd;border-bottom:1px solid #999">
+          <span style="font-size:10.5px;font-weight:800;color:var(--navy);white-space:nowrap">✍ NAME &amp; SURNAME</span>
+          <input type="text" class="chkname" data-namekey="${k}:${i}" value="${esc(nm)}" placeholder="Enter name and surname…" style="flex:1;border:1px solid #aaa;border-radius:5px;padding:5px 8px;font-size:12px;background:#fff">
+        </div>`:""}`;
+      }).join("")}
+    </div>`;
+  },
+
+  personRow(pr,i){
+    return `<div class="prow" data-pi="${i}">
+      <input placeholder="Person name" class="p_name" value="${esc(pr.name)}">
+      <input placeholder="Total" type="number" min="1" class="p_total" value="${esc(pr.total)}">
+      <input placeholder="WC Policy No." class="p_wc" value="${esc(pr.wc)}">
+      <input placeholder="Expiry" type="date" class="p_wcexp" value="${esc(pr.wcExp)}">
+      <button class="del" type="button" onclick="Form.delPerson(${i})">✕</button>
+    </div>`;
+  },
+
+  pads:{},
+  bind(p){
+    $("#pform").addEventListener("click", e=>{
+      const b = e.target.closest(".yna button"); if(!b) return;
+      b.parentElement.querySelectorAll("button").forEach(x=>x.className="");
+      b.classList.add(b.dataset.v==="Y"?"selY":b.dataset.v==="N"?"selN":"selNA");
+      const qrow=b.closest(".qrow");
+      const nr=qrow&&qrow.nextElementSibling;
+      if(nr&&nr.classList.contains("namerow")){
+        nr.style.display=b.dataset.v==="Y"?"flex":"none";
+        if(b.dataset.v!=="Y"){const inp=nr.querySelector("input");if(inp)inp.value="";}
+      }
+    });
+    document.querySelectorAll("[data-type]").forEach(cb=>{
+      cb.addEventListener("change", ()=>{ Form.collect(p); upsert(p); App.openPermit(p.id); });
+    });
+    Form.pads={};
+    Form.SIGN_KEYS.forEach(k=>{
+      const cv = document.getElementById("sig_"+k); if(!cv) return;
+      Form.pads[k] = Form.initPad(cv, p.sigs[k]?.data);
+    });
+  },
+
+  initPad(cv, existing){
+    const ctx = cv.getContext("2d");
+    ctx.lineWidth=2; ctx.lineCap="round"; ctx.strokeStyle="#102a54";
+    let drawing=false, dirty=!!existing;
+    if(existing){ const img=new Image(); img.onload=()=>ctx.drawImage(img,0,0,cv.width,cv.height); img.src=existing; }
+    const pos = e=>{
+      const r=cv.getBoundingClientRect();
+      return {x:(e.clientX-r.left)*cv.width/r.width, y:(e.clientY-r.top)*cv.height/r.height};
+    };
+    cv.addEventListener("pointerdown",e=>{drawing=true;dirty=true;const p=pos(e);ctx.beginPath();ctx.moveTo(p.x,p.y);cv.setPointerCapture(e.pointerId);e.preventDefault();});
+    cv.addEventListener("pointermove",e=>{if(!drawing)return;const p=pos(e);ctx.lineTo(p.x,p.y);ctx.stroke();e.preventDefault();});
+    cv.addEventListener("pointerup",()=>drawing=false);
+    cv.addEventListener("pointercancel",()=>drawing=false);
+    return { data:()=>dirty?cv.toDataURL("image/png"):"", clear:()=>{ctx.clearRect(0,0,cv.width,cv.height);dirty=false;} };
+  },
+  clearSig(k){ Form.pads[k]?.clear(); },
+
+  _nowLocal(){ return (d=>{d.setSeconds(0,0);d.setMinutes(d.getMinutes()-d.getTimezoneOffset());return d.toISOString().slice(0,16);})(new Date()); },
+  onStartDateChange(){
+    const sEl=$("#f_start"), eEl=$("#f_expiry"); if(!sEl) return;
+    const now=this._nowLocal();
+    if(sEl.value && sEl.value<now){ sEl.value=now; toast("⚠ Start date/time cannot be in the past"); }
+    if(eEl){ eEl.min=sEl.value||now; if(eEl.value && eEl.value<(sEl.value||now)){ eEl.value=sEl.value||now; toast("⚠ Expiry must be after the start date/time"); } }
+  },
+  onExpiryDateChange(){
+    const eEl=$("#f_expiry"), sEl=$("#f_start"); if(!eEl) return;
+    const now=this._nowLocal(), minV=(sEl&&sEl.value)||now;
+    if(eEl.value && eEl.value<minV){ eEl.value=minV; toast("⚠ Expiry date/time cannot be in the past / before start"); }
+  },
+
+  addPerson(){
+    const p = getPermit(App.editing); Form.collect(p);
+    p.persons.push({name:"",total:"",wc:"",wcExp:""});
+    upsert(p); App.openPermit(p.id);
+  },
+  delPerson(i){
+    const p = getPermit(App.editing); Form.collect(p);
+    p.persons.splice(i,1); if(!p.persons.length) p.persons.push({name:"",total:"",wc:"",wcExp:""});
+    upsert(p); App.openPermit(p.id);
+  },
+
+  collect(p){
+    if(!Perm.canEdit(p) || p.status==="closed") return;
+    p.types = Array.from(document.querySelectorAll("[data-type]:checked")).map(c=>c.dataset.type);
+    p.desc = $("#f_desc").value; p.company = $("#f_company").value; p.location = $("#f_location").value;
+    if($("#f_start").value)  p.start  = new Date($("#f_start").value).toISOString();
+    if($("#f_expiry").value) p.expiry = new Date($("#f_expiry").value).toISOString();
+    p.wsaDept = $("#f_wsadept") ? $("#f_wsadept").value : p.wsaDept;
+    p.otherPPE = $("#f_otherppe").value;
+    document.querySelectorAll('.yna[data-g="ppe"]').forEach(g=>{
+      const sel = g.querySelector(".selY,.selN,.selNA");
+      const v = sel? sel.dataset.v : "";
+      if(g.dataset.i==="other") p.otherPPEAns = v;
+      else p.ppe[PPE[+g.dataset.i]] = v;
+    });
+    Object.keys(CHECKLISTS).forEach(k=>{
+      if(p.types.includes(k)){
+        document.querySelectorAll(`.yna[data-g="chk:${k}"]`).forEach(g=>{
+          const sel = g.querySelector(".selY,.selN,.selNA");
+          p.checks[k][+g.dataset.i] = sel? sel.dataset.v : "";
+        });
+      } else {
+        p.checks[k] = CHECKLISTS[k].q.map(()=> "NA");
+      }
+    });
+    p.checkNames={};
+    document.querySelectorAll(".chkname").forEach(inp=>{const v=inp.value.trim();if(v)p.checkNames[inp.dataset.namekey]=v;});
+    const remEl=document.getElementById("f_remarks"); if(remEl) p.remarks=remEl.value;
+    p.persons = Array.from(document.querySelectorAll(".prow")).map(r=>({
+      name:r.querySelector(".p_name").value, total:r.querySelector(".p_total").value,
+      wc:r.querySelector(".p_wc").value, wcExp:r.querySelector(".p_wcexp").value
+    }));
+    Form.SIGN_KEYS.forEach(k=>{
+      const nameEl = document.getElementById("sn_"+k);
+      p.sigs[k] = { name: k==="ua" ? p.createdByName : (nameEl?nameEl.value:""), data: Form.pads[k]?Form.pads[k].data():(p.sigs[k]?.data||"") };
+    });
+  },
+
+  save(action){
+    const p = getPermit(App.editing); if(!p) return;
+    Form.collect(p);
+    const _now=nowMin();
+    if(new Date(p.start).getTime()<_now){ toast("⚠ Start date/time cannot be in the past"); return; }
+    if(new Date(p.expiry).getTime()<_now){ toast("⚠ Expiry date/time cannot be in the past"); return; }
+    if(new Date(p.expiry)<=new Date(p.start)){ toast("⚠ Expiry must be after the start date/time"); return; }
+    if(action==="submit"){
+      if(!p.types.length){ toast("⚠ Select at least one permit type"); return; }
+      if(!p.desc.trim()){ toast("⚠ Description of the work is required"); return; }
+      if(!p.company.trim()){ toast("⚠ Undertaking company is required"); return; }
+      if(!p.wsaDept){ toast("⚠ Assign Work Site Authority department for approval"); return; }
+    }
+    if(action==="draft"){ p.status = p.status==="approved"?p.status:"draft"; toast("Draft saved 💾"); }
+    if(action==="submit"){
+      if(!p.no) p.no = Store.nextNo();          // PERMIT No. generated on first submit
+      p.status="submitted"; p.rejectReason="";
+      p.approvedBy=""; p.approvedByName=""; p.approvedByDept=""; p.approvedAt=0;
+      p.safetyBy=""; p.safetyByName=""; p.safetyAt=0;
+      toast(`${p.no} submitted → awaiting ${p.wsaDept} approval 📤`);
+    }
+    upsert(p);
+    if(action==="submit") App.go("dash");
+    else if(action==="draft") App.openPermit(p.id);
+  }
+};
+
+/* ---------------- REPORTS ---------------- */
+App.reportFilter = "all";
+App.reportSource = "active";   // "active" node cache vs "archive"
+App.fetchArchiveYear = async function(){
+  const y = +document.getElementById("arcYear").value || new Date().getFullYear();
+  toast(`Fetching archive ${y}…`);
+  await FB.fetchArchive(y);
+  App.reportSource = "archive"; App.page = 1; App.render();
+};
+App.renderReports = function(){
+  let list;
+  if(App.reportSource==="archive"){
+    list = Store.archiveList().slice().sort((a,b)=>b.createdAt-a.createdAt);
+    if(App.search) list = list.filter(p=>(p.no||"").toLowerCase().includes(App.search)||(p.company||"").toLowerCase().includes(App.search));
+  } else {
+    list = App.filtered();
+  }
+  if(App.reportFilter!=="all") list = list.filter(p=>effStatus(p)===App.reportFilter);
+  const pages = Math.max(1, Math.ceil(list.length/REPORT_PAGE));
+  if(App.page>pages) App.page=pages;
+  const slice = list.slice((App.page-1)*REPORT_PAGE, App.page*REPORT_PAGE);
+  const opts = ["all","draft","submitted","wsa_approved","active","expired","closed","rejected"];
+  const years = []; for(let y=new Date().getFullYear(); y>=new Date().getFullYear()-5; y--) years.push(y);
+  return `
+    <h3 style="margin:4px 0 12px;color:var(--navy)">📊 Permit Reports</h3>
+    <div class="toolrow">
+      <select onchange="App.reportSource=this.value;App.page=1;App.render()" style="padding:8px;border-radius:7px;border:1.5px solid var(--border)">
+        <option value="active" ${App.reportSource==="active"?"selected":""}>📂 Active data (${Store.load().length})</option>
+        <option value="archive" ${App.reportSource==="archive"?"selected":""}>🗄 Archive (${Store.archiveList().length} cached)</option>
+      </select>
+      <select onchange="App.reportFilter=this.value;App.page=1;App.render()" style="padding:8px;border-radius:7px;border:1.5px solid var(--border)">
+        ${opts.map(o=>`<option value="${o}" ${App.reportFilter===o?"selected":""}>${o==="all"?"All statuses":ST_LABEL[o]}</option>`).join("")}
+      </select>
+      <button class="btn green" onclick="Excel.all()">📑 Export All to Excel</button>
+      <span style="font-size:12px;color:var(--gray)">${list.length} record(s)</span>
+    </div>
+    ${App.reportSource==="archive"?`<div class="toolrow">
+      <select id="arcYear" style="padding:8px;border-radius:7px;border:1.5px solid var(--border)">${years.map(y=>`<option>${y}</option>`).join("")}</select>
+      <button class="btn blue" onclick="App.fetchArchiveYear()">☁ Fetch archive year (max ${CLOUD_PAGE})</button>
+      ${Auth.isSafety()?`<button class="btn amber" onclick="FB.archiveOld()">🗄 Archive closed/rejected &gt; ${ARCHIVE_AFTER_DAYS} days</button>`:""}
+    </div>`:Auth.isSafety()?`<div class="toolrow"><button class="btn amber" onclick="FB.archiveOld()">🗄 Archive closed/rejected &gt; ${ARCHIVE_AFTER_DAYS} days</button></div>`:""}
+    <div class="tablewrap"><table class="rtable">
+      <thead><tr><th>Permit No</th><th>Status</th><th>Types</th><th>Created By</th><th>WSA Dept</th><th>WSA Approved</th><th>Safety Approved</th><th>Closed By</th><th>Company</th><th>Start</th><th>Expiry</th><th>Renew</th><th></th></tr></thead>
+      <tbody>${slice.map(p=>{
+        const st = effStatus(p);
+        return `<tr>
+          <td><b>${esc(p.no)||"(draft)"}</b></td>
+          <td><span class="badge ${st}">${ST_LABEL[st]}</span></td>
+          <td>${p.types.join(", ")||"—"}</td>
+          <td>${esc(p.createdByName)||"—"}</td>
+          <td>${esc(p.wsaDept)||"—"}</td>
+          <td>${esc(p.approvedByName)||"—"}</td>
+          <td>${esc(p.safetyByName)||"—"}</td>
+          <td>${[p.closeUA&&"UA: "+p.closeUA.name, p.closeWSA&&"WSA: "+p.closeWSA.name].filter(Boolean).map(esc).join("<br>")||"—"}</td>
+          <td>${esc(p.company)||"—"}</td>
+          <td>${fmtDT(p.start)}</td><td>${fmtDT(p.expiry)}</td>
+          <td style="text-align:center">${p.renewals.length}</td>
+          <td style="white-space:nowrap">
+            <button class="btn outline" onclick="App.openPermit('${p.id}')">Open</button>
+            <button class="btn outline" onclick="App.print('${p.id}')">🖨</button>
+          </td></tr>`;}).join("") || `<tr><td colspan="13" style="text-align:center;color:var(--gray);padding:30px">No records</td></tr>`}
+      </tbody></table></div>
+    ${pages>1?`<div class="pager">
+        <button class="btn outline" ${App.page<=1?"disabled":""} onclick="App.page--;App.render()">‹ Prev</button>
+        <span class="pinfo">Page ${App.page} / ${pages}</span>
+        <button class="btn outline" ${App.page>=pages?"disabled":""} onclick="App.page++;App.render()">Next ›</button>
+      </div>`:""}`;
+};
+
+/* ---------------- EXCEL EXPORT (full register only) ---------------- */
+const Excel = {
+  download(name, tableHTML){
+    const html = `<html xmlns:o="urn:schemas-microsoft-com:office:office" xmlns:x="urn:schemas-microsoft-com:office:excel">
+      <head><meta charset="UTF-8"><!--[if gte mso 9]><xml><x:ExcelWorkbook><x:ExcelWorksheets><x:ExcelWorksheet>
+      <x:Name>Permits</x:Name><x:WorksheetOptions><x:DisplayGridlines/></x:WorksheetOptions></x:ExcelWorksheet>
+      </x:ExcelWorksheets></x:ExcelWorkbook></xml><![endif]--></head><body>${tableHTML}</body></html>`;
+    const blob = new Blob(["\ufeff"+html], {type:"application/vnd.ms-excel"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob); a.download = name; a.click();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 5000);
+    toast("Excel exported 📑");
+  },
+  all(){
+    const rows = Store.load().map(p=>{
+      const st = effStatus(p);
+      return `<tr><td>${esc(p.no)}</td><td>${ST_LABEL[st]}</td><td>${p.types.join("; ")}</td>
+        <td>${esc(p.desc)}</td><td>${esc(p.company)}</td><td>${esc(p.location)}</td>
+        <td>${esc(p.createdByName)}</td><td>${esc(p.wsaDept)}</td><td>${esc(p.approvedByName)}</td><td>${esc(p.safetyByName)}</td>
+        <td>${esc(p.closeUA?.name||"")}</td><td>${esc(p.closeWSA?.name||"")}</td>
+        <td>${fmtDT(p.start)}</td><td>${fmtDT(p.expiry)}</td><td>${p.renewals.length}</td>
+        <td>${esc(p.persons.map(x=>x.name).filter(Boolean).join("; "))}</td>
+        <td>${p.persons.reduce((s,x)=>s+(+x.total||0),0)}</td>
+        <td>${esc(p.persons.map(x=>x.wc).filter(Boolean).join("; "))}</td>
+        <td>${esc(p.rejectReason)}</td></tr>`;}).join("");
+    Excel.download("PTW_Report_"+todayInput()+".xls",
+      `<table border="1"><tr style="background:#0d3b66;color:#fff"><th>Permit No</th><th>Status</th><th>Types</th><th>Description</th><th>Company</th><th>Location</th><th>Created By</th><th>WSA Dept</th><th>WSA Approved By</th><th>Safety Approved By</th><th>Closed By (UA)</th><th>Closed By (WSA)</th><th>Start</th><th>Expiry</th><th>Renewals</th><th>Persons</th><th>Total Persons</th><th>WC Policy</th><th>Reject Reason</th></tr>${rows}</table>`);
+  }
+};
+
+/* ---------------- PRINT (A4, replicating form) ---------------- */
+const Print = {
+  run(p){
+    if(!p) return;
+    $("#printArea").innerHTML = Print.page1(p) + Print.page2(p);
+    setTimeout(()=>window.print(), 150);
+  },
+  box(checked){ return `<span style="display:inline-block;width:11px;height:11px;border:1.5px solid #000;text-align:center;line-height:10px;font-size:10px;vertical-align:middle">${checked?"✗":"&nbsp;"}</span>`; },
+  ans(v){
+    if(v==="Y")  return `<b style="border:1.5px solid #000;border-radius:8px;padding:0 5px">Y</b> / NA`;
+    if(v==="NA") return `Y / <b style="border:1.5px solid #000;border-radius:8px;padding:0 4px">NA</b>`;
+    if(v==="N")  return `<b style="color:#000">NO ✗</b>`;
+    return "Y / NA";
+  },
+  sig(p,k){ const s=p.sigs[k]||{}; return `${esc(s.name||"")}${s.data?`<br><img src="${s.data}" style="height:34px">`:""}`; },
+  closeBox(c){
+    return c
+      ? `<div style="border:1.5px solid #000;border-radius:4px;padding:3px;margin-top:3px;text-align:center;font-weight:bold;font-size:9px">🔒 CLOSED BY ${esc(c.name.toUpperCase())}<br><span style="font-weight:normal;font-size:7.5px">${esc(c.dept)} Dept • ${fmtDT(new Date(c.at).toISOString())}</span></div>`
+      : `<div style="font-size:8px;margin-top:6px;color:#333">Not closed yet</div>`;
+  },
+  dt(iso){ const d=new Date(iso); return `${String(d.getDate()).padStart(2,"0")} / ${String(d.getMonth()+1).padStart(2,"0")} / ${d.getFullYear()} &nbsp; ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`; },
+
+  page1(p){
+    const T = "border:1px solid #000;border-collapse:collapse;width:100%;font-size:9px";
+    const td = "border:1px solid #000;padding:2px 4px;vertical-align:middle";
+    const ppeCells = PPE.map(e=>({n:e, v:p.ppe[e]})).concat([{n:"OTHER: "+(p.otherPPE||"(PLEASE SPECIFY)"), v:p.otherPPEAns}]);
+    const col = n=>{ const per=Math.ceil(ppeCells.length/3); return ppeCells.slice(n*per,(n+1)*per); };
+    const ppeRows = []; const c0=col(0),c1=col(1),c2=col(2);
+    for(let i=0;i<Math.max(c0.length,c1.length,c2.length);i++){
+      ppeRows.push(`<tr>${[c0[i],c1[i],c2[i]].map(c=>c?`<td style="${td};font-weight:bold">${esc(c.n)}</td><td style="${td};text-align:center;width:52px">${Print.ans(c.v)}</td>`:`<td style="${td}" colspan="2"></td>`).join("")}</tr>`);
+    }
+    const hot = CHECKLISTS.HOT;
+    const wsaPrint = p.approvedByName
+      ? `<div style="border:1.5px solid #000;border-radius:4px;padding:3px;margin-top:3px;text-align:center;font-weight:bold;font-size:9px">✔ APPROVED BY ${esc(p.approvedByName.toUpperCase())}<br><span style="font-weight:normal;font-size:7.5px">${esc(p.approvedByDept)} Dept • ${fmtDT(new Date(p.approvedAt).toISOString())}</span></div>`
+      : `<div style="font-size:8px;margin-top:6px;color:#333">Pending approval – assigned dept: ${esc(p.wsaDept||"—")}</div>`;
+    const osaPrint = p.safetyByName
+      ? `<div style="border:1.5px solid #000;border-radius:4px;padding:3px;margin-top:3px;text-align:center;font-weight:bold;font-size:9px">✔ APPROVED BY ${esc(p.safetyByName.toUpperCase())}<br><span style="font-weight:normal;font-size:7.5px">Safety Dept • ${fmtDT(new Date(p.safetyAt).toISOString())}</span></div>`
+      : `<div style="font-size:8px;margin-top:6px;color:#333">Pending Safety approval</div>`;
+    return `<div class="ppage">
+      <table style="${T}"><tr>
+        <td style="${td};width:50px;font-weight:bold">PAGE: 1 / 2</td>
+        <td style="${td};text-align:center;font-size:17px;font-weight:bold;letter-spacing:2px">SAFE WORKING PERMISSION</td>
+        <td style="${td};width:110px;text-align:center"><b style="font-size:13px;letter-spacing:2px;border:1.5px solid #000;padding:0 4px">E.N.P.A.Y</b><br><span style="font-size:6px">Transformer Components</span></td>
+      </tr></table>
+      <table style="${T};border-top:none"><tr>
+        ${TYPES.map(t=>`<td style="${td};font-size:7.2px;font-weight:bold;text-align:center">${Print.box(p.types.includes(t.k))} ${t.label}</td>`).join("")}
+        <td style="${td};font-size:8px;font-weight:bold;text-align:center">PERMIT No.<br><span style="font-size:12px;font-family:'Courier New'">${esc(p.no)}</span></td>
+      </tr></table>
+      <table style="${T};border-top:none">
+        <tr><td style="${td}" colspan="2"><b>DESCRIPTION OF THE WORK :</b> ${esc(p.desc)}</td>
+            <td style="${td}"><b>UNDERTAKING COMPANY :</b> ${esc(p.company)}</td></tr>
+        <tr><td style="${td}"><b>WORK LOCATION :</b> ${esc(p.location)}</td>
+            <td style="${td}"><b>PERMIT START DATE/TIME :</b> ${Print.dt(p.start)}</td>
+            <td style="${td}"><b>PERMIT EXPIRY DATE/TIME :</b> ${Print.dt(p.expiry)}</td></tr>
+        <tr><td style="${td}"><b>CREATED BY :</b> ${esc(p.createdByName)}</td>
+            <td style="${td}" colspan="2"><b>WORK SITE AUTHORITY DEPT :</b> ${esc(p.wsaDept||"—")}</td></tr>
+      </table>
+      <div style="font-size:9px;font-weight:bold;margin-top:5px">PROTECTIVE EQUIPMENT THAT MAY BE REQUIRED:</div>
+      <div style="font-size:8px;margin-bottom:2px">Mark the required based on the undertaken work. (This shall be filled by Occupational Safety Specialist).</div>
+      <table style="${T}">
+        <tr>${[0,1,2].map(()=>`<th style="${td};background:#e5e5e5">EQUIPMENT</th><th style="${td};background:#e5e5e5;font-size:7.5px">YES / NOT APPLICABLE</th>`).join("")}</tr>
+        ${ppeRows.join("")}
+      </table>
+      <div style="background:#3f3f3f;color:#fff;text-align:center;font-weight:bold;font-size:9.5px;padding:2px;margin-top:5px">ON THE JOB SIGNINGS (NAME / SIGNATURE)</div>
+      <table style="${T}"><tr>
+        <td style="${td};width:33%;height:62px;vertical-align:top"><b style="font-size:8.5px">UNDERTAKING AUTHORITY</b><br><span style="font-size:6.8px">(The person responsible for the workers) I have readily been witness to filling this document and took required precautions.</span><div style="border:1.5px solid #000;border-radius:4px;padding:3px;margin-top:3px;text-align:center;font-weight:bold;font-size:9px">✍ CREATED BY ${esc((p.createdByName||"—").toUpperCase())}<br><span style="font-weight:normal;font-size:7.5px">${esc(p.createdByDept||"—")} Dept • ${fmtDT(new Date(p.createdAt).toISOString())}</span></div></td>
+        <td style="${td};width:34%;vertical-align:top"><b style="font-size:8.5px">WORK SITE AUTHORITY</b><br><span style="font-size:6.8px">(Assigned department approval) I was informed regarding the job to be completed. I have delivered the working site with the responsibilities to exercise the required precautions.</span>${wsaPrint}</td>
+        <td style="${td};width:33%;vertical-align:top"><b style="font-size:8.5px">OCCUPATIONAL SAFETY AUTHORITY</b><br><span style="font-size:6.8px">Final approval by Safety department.</span>${osaPrint}</td>
+      </tr></table>
+      ${p.remarks?`<table style="${T};border-top:none"><tr><td style="${td};vertical-align:top"><b style="font-size:8.5px">ADDITIONAL REMARKS / INSTRUCTIONS :</b> ${esc(p.remarks)}</td></tr></table>`:""}
+      <table style="${T};border-top:none"><tr><td style="${td};vertical-align:top;height:46px">
+        <b style="font-size:8.5px">UNDERTAKING PERSONS :</b> ${p.persons.filter(x=>x.name).map(x=>`${esc(x.name)} (Total: ${esc(x.total)||"-"}, WC Policy: ${esc(x.wc)||"-"}, Exp: ${esc(x.wcExp)||"-"})`).join(" ; ")}
+        <br><i style="font-size:7.5px">I have understood the contents of this document and the hazardous nature of the work, I have taken required precautions and I shall apply them.</i>
+      </td></tr></table>
+      <div style="background:#3f3f3f;color:#fff;text-align:center;font-weight:bold;font-size:9.5px;padding:2px;margin-top:4px">JOB COMPLETION CLOSINGS</div>
+      <table style="${T}"><tr>
+        <td style="${td};width:50%;height:58px;vertical-align:top"><b style="font-size:8.5px">UNDERTAKING AUTHORITY (${esc(p.createdByDept||"—")} Dept)</b><br><span style="font-size:7px">The work is completed, the working site is delivered clean and safe.</span>${Print.closeBox(p.closeUA)}</td>
+        <td style="${td};vertical-align:top"><b style="font-size:8.5px">WORK SITE AUTHORITY (${esc(p.wsaDept||"—")} Dept)</b> <span style="font-size:6.5px">(Please send the form to occupational safety authority)</span><br><span style="font-size:7px">The work is completed, the working site is received clean and safe.</span>${Print.closeBox(p.closeWSA)}</td>
+      </tr></table>
+      <div style="background:#3f3f3f;color:#fff;text-align:center;font-weight:bold;font-size:9.5px;padding:2px;margin-top:5px">IN AN EVENT OF AN EMERGENCY OR AN ACCIDENT, CALL OHS DEPT IMMEDIATELY!</div>
+      ${Print.section("HOT PROCESS", hot.q, p.checks.HOT, p.types.includes("HOT"), "HOT", p.checkNames)}
+      <div style="font-size:8px;margin-top:4px;display:flex;justify-content:space-between"><span>FR-4.4.6-07/B</span><span>NOTE</span></div>
+    </div>`;
+  },
+
+  section(title, qs, answers, enabled, ckKey, names){
+    const td = "border:1px solid #000;padding:1.6px 4px";
+    return `<table style="border:1px solid #000;border-collapse:collapse;width:100%;font-size:8.4px;margin-top:4px">
+      <tr><th style="${td};width:22px;background:#e5e5e5">NO</th>
+          <th style="${td};background:#e5e5e5;text-align:center;font-size:9.5px">${title}${enabled?"":" — NOT APPLICABLE"}</th>
+          <th style="${td};width:108px;background:#e5e5e5;font-size:7.5px">YES / NOT APPLICABLE</th></tr>
+      ${qs.map((q,i)=>{
+        const isName=/name and surname/i.test(q);
+        const nm=(isName&&enabled&&answers[i]==="Y"&&names)?(names[ckKey+":"+i]||""):"";
+        return `<tr><td style="${td};text-align:center">${i+1}</td><td style="${td}">${esc(q)}${nm?`<br><span style="font-size:8px"><i>→ ${esc(nm)}</i></span>`:""}</td><td style="${td};text-align:center">${Print.ans(answers[i])}</td></tr>`;
+      }).join("")}
+    </table>`;
+  },
+
+  page2(p){
+    return `<div class="ppage">
+      <table style="border:1px solid #000;border-collapse:collapse;width:100%;font-size:9px"><tr>
+        <td style="border:1px solid #000;padding:2px 4px;width:50px;font-weight:bold">PAGE: 2 / 2</td>
+        <td style="border:1px solid #000;padding:2px 4px;text-align:center;font-size:14px;font-weight:bold;letter-spacing:2px">SAFE WORKING PERMISSION</td>
+        <td style="border:1px solid #000;padding:2px 4px;width:120px;text-align:center;font-weight:bold">PERMIT No. ${esc(p.no)}</td>
+      </tr></table>
+      ${Print.section("ENTERING THE RESTRICTED SITE", CHECKLISTS.RES.q, p.checks.RES, p.types.includes("RES"), "RES", p.checkNames)}
+      ${Print.section("HAZARDOUS MATERIAL LINE CUTTING", CHECKLISTS.HAZ.q, p.checks.HAZ, p.types.includes("HAZ"), "HAZ", p.checkNames)}
+      ${Print.section("LOCK OUT - TAG OUT", CHECKLISTS.LOTO.q, p.checks.LOTO, p.types.includes("LOTO"), "LOTO", p.checkNames)}
+      ${Print.section("WORKING AT HEIGHT", CHECKLISTS.HGT.q, p.checks.HGT, p.types.includes("HGT"), "HGT", p.checkNames)}
+      ${Print.section("PIT - EXCAVATION WORKS", CHECKLISTS.PIT.q, p.checks.PIT, p.types.includes("PIT"), "PIT", p.checkNames)}
+      ${Print.section("ENVIRONMENT IMPACT", CHECKLISTS.ENV.q, p.checks.ENV, p.types.includes("ENV"), "ENV", p.checkNames)}
+      <div style="font-size:8px;margin-top:4px">FR-4.4.6-07/B</div>
+    </div>`;
+  }
+};
+
+/* ---------------- SESSION (inactivity auto-logout) ----------------
+   Tracks REAL user interaction (mouse, keyboard, click, scroll, touch).
+   Background timers / Firebase sync do NOT count as activity.
+   After SESSION_TIMEOUT ms of no activity, logs out silently. */
+const Session = {
+  _timer:null, _events:["mousedown","keydown","touchstart","scroll","mousemove"],
+  _onActivity(){
+    clearTimeout(Session._timer);
+    Session._timer = setTimeout(()=>{
+      if(Auth.user){
+        console.log("Session timed out – auto logout");
+        Auth.logout();
+      }
+    }, SESSION_TIMEOUT);
+  },
+  start(){
+    Session.stop();
+    Session._events.forEach(ev=>window.addEventListener(ev, Session._onActivity, {passive:true}));
+    Session._onActivity();
+  },
+  stop(){
+    clearTimeout(Session._timer);
+    Session._events.forEach(ev=>window.removeEventListener(ev, Session._onActivity));
+  }
+};
+
+/* ---------------- NOTIFICATIONS ---------------- */
+const Notifier = {
+  start(){
+    Notifier.check();
+    setInterval(Notifier.check, 60_000);
+    setInterval(()=>App.refresh(), 60_000);
+  },
+  request(){
+    if(!("Notification" in window)){ toast("Notifications not supported in this browser"); return; }
+    Notification.requestPermission().then(r=>{
+      toast(r==="granted" ? "🔔 Notifications enabled" : "Notifications blocked");
+      if(r==="granted") Notifier.check(true);
+    });
+  },
+  notify(title, body, tag){
+    if(App.notified[tag]) return;
+    App.notified[tag] = true;
+    if("Notification" in window && Notification.permission==="granted"){
+      try{ new Notification(title, {body, tag}); }catch(e){}
+    }
+    toast(title+" – "+body);
+  },
+  check(force){
+    if(!Auth.user) return;
+    const now = Date.now();
+    Store.load().forEach(p=>{
+      const st = effStatus(p);
+      const exp = new Date(p.expiry).getTime();
+      if(st==="active" && exp-now < DAY && exp-now > 0){
+        const today = new Date(exp).toDateString()===new Date().toDateString();
+        Notifier.notify(
+          today ? "⏰ Permit due today" : "⏰ Permit expiry reminder",
+          `${p.no} expires ${fmtDT(p.expiry)} – ${p.company||p.desc||""}`,
+          "due-"+p.id+"-"+new Date().toDateString());
+      }
+      if(st==="expired"){
+        Notifier.notify("⛔ Permit EXPIRED", `${p.no} expired ${fmtDT(p.expiry)}. ${Auth.isSafety()?"Renew (1 day) or close it.":"Contact Safety dept."}`,
+          "exp-"+p.id+"-"+new Date().toDateString());
+      }
+      if(st==="submitted" && Perm.canApprove(p) && !Auth.isAdmin()){
+        Notifier.notify("📥 Approval needed", `${p.no} awaits ${p.wsaDept} department (WSA) approval`, "appr-"+p.id);
+      }
+      if(st==="wsa_approved" && Perm.canSafetyApprove() && !Auth.isAdmin()){
+        Notifier.notify("🛡 Safety approval needed", `${p.no} is WSA approved – awaiting Safety final approval`, "sappr-"+p.id);
+      }
+      if(["active","expired"].includes(st) && !Auth.isAdmin()){
+        if(!p.closeUA && p.closeWSA && Perm.canCloseUA(p))
+          Notifier.notify("🔒 Closure needed", `${p.no} – WSA side closed, awaiting your dept (UA) closure`, "clua-"+p.id);
+        if(!p.closeWSA && p.closeUA && Perm.canCloseWSA(p))
+          Notifier.notify("🔒 Closure needed", `${p.no} – UA side closed, awaiting your dept (WSA) closure`, "clwsa-"+p.id);
+      }
+    });
+  }
+};
+
+window.addEventListener("DOMContentLoaded", App.init);
+
+</script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a0b0fb74ca6a0f3f',t:'MTc4MTM1MjUyMw=='};var a=document.createElement('script');a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>
